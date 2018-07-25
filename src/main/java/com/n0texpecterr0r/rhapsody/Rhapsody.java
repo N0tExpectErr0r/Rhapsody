@@ -1,7 +1,11 @@
 package com.n0texpecterr0r.rhapsody;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import java.lang.ref.WeakReference;
 import java.util.Set;
 
@@ -10,7 +14,7 @@ import java.util.Set;
  * @date 2018/7/25 9:49
  * @describe 图片选择器的入口
  */
-public class ImageSelector {
+public class Rhapsody {
 
     //持有Activity与Fragment的弱引用
     private final WeakReference<Activity> mActivity;
@@ -20,7 +24,7 @@ public class ImageSelector {
      * 调用from(Activity)时的构造函数
      * @param activity 传入的Activity
      */
-    private ImageSelector(Activity activity) {
+    private Rhapsody(Activity activity) {
         this(activity, (Fragment)null);
 
     }
@@ -29,7 +33,7 @@ public class ImageSelector {
      * 调用from(Fragment)时的构造函数
      * @param fragment 传入的Fragment
      */
-    private ImageSelector(Fragment fragment) {
+    private Rhapsody(Fragment fragment) {
         this(fragment.getActivity(),fragment);
     }
 
@@ -38,7 +42,7 @@ public class ImageSelector {
      * @param activity Activity
      * @param fragment Fragment
      */
-    private ImageSelector(Activity activity, Fragment fragment) {
+    private Rhapsody(Activity activity, Fragment fragment) {
         mActivity = new WeakReference<>(activity);
         mFragment = new WeakReference<>(fragment);
     }
@@ -47,16 +51,16 @@ public class ImageSelector {
      * 从Activity调用时的方法
      * @param activity 该Activity
      */
-    public static ImageSelector from(Activity activity) {
-        return new ImageSelector(activity);
+    public static Rhapsody from(Activity activity) {
+        return new Rhapsody(activity);
     }
 
     /**
      * 从Fragment调用时的方法
      * @param fragment 该Fragment
      */
-    public static ImageSelector from(Fragment fragment) {
-        return new ImageSelector(fragment);
+    public static Rhapsody from(Fragment fragment) {
+        return new Rhapsody(fragment);
     }
 
     /**
@@ -82,4 +86,5 @@ public class ImageSelector {
     public Fragment getFragment() {
         return mFragment.get();
     }
+
 }

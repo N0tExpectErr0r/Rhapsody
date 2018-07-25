@@ -1,9 +1,14 @@
 package com.n0texpecterr0r.rhapsody;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import java.util.Set;
 
 /**
@@ -13,7 +18,7 @@ import java.util.Set;
  */
 public final class SelectorBuilder {
 
-    private final ImageSelector mSelector;
+    private final Rhapsody mSelector;
     private final SelectConfig mConfig;
 
     /**
@@ -22,7 +27,7 @@ public final class SelectorBuilder {
      * @param selector 传入的选择器
      * @param imageTypes 传入的图片类型
      */
-    SelectorBuilder(ImageSelector selector, @NonNull Set<ImageType> imageTypes) {
+    SelectorBuilder(Rhapsody selector, @NonNull Set<ImageType> imageTypes) {
         mSelector = selector;
         mConfig = SelectConfig.getResetInstance();
         mConfig.imageTypes = imageTypes;
@@ -75,4 +80,5 @@ public final class SelectorBuilder {
             }
         }
     }
+
 }

@@ -16,9 +16,9 @@ import java.util.concurrent.Executors;
  * @date 2018/7/24 10:37
  * @describe 单例模式图片加载类
  */
-public class ImageLoader {
+public class LoaderTest {
 
-    private static ImageLoader sInstance;
+    private static LoaderTest sInstance;
 
     private LruCache<String,Bitmap> mImgCache;  //用于图片缓存
 
@@ -50,7 +50,7 @@ public class ImageLoader {
      * @param threadCount 线程数
      * @param type 类型
      */
-    private ImageLoader(int threadCount,LoadType type) {
+    private LoaderTest(int threadCount,LoadType type) {
         init(threadCount,type);
     }
 
@@ -58,12 +58,12 @@ public class ImageLoader {
      * 获取实例
      * @return 实例
      */
-    public static ImageLoader getInstance() {
+    public static LoaderTest getInstance() {
         //外层判断提高了效率(过滤掉一些代码)
         if (sInstance == null) {
-            synchronized (ImageLoader.class) {
+            synchronized (LoaderTest.class) {
                 if (sInstance == null) {
-                    sInstance = new ImageLoader(DEFAULT_THREAD_COUNT,LoadType.LIFO);
+                    sInstance = new LoaderTest(DEFAULT_THREAD_COUNT,LoadType.LIFO);
                 }
             }
         }

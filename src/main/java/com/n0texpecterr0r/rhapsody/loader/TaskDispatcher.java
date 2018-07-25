@@ -1,4 +1,4 @@
-package com.n0texpecterr0r.rhapsody.util;
+package com.n0texpecterr0r.rhapsody.loader;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -67,7 +67,7 @@ public class TaskDispatcher {
      * @param threadCount 线程池的线程数量
      * @param type 队列的调度方式
      */
-    private TaskDispatcher(int threadCount, Type type) {
+    protected TaskDispatcher(int threadCount, Type type) {
         init(threadCount, type);
     }
 

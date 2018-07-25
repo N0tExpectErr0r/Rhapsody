@@ -1,7 +1,6 @@
-package com.n0texpecterr0r.rhapsody;
+package com.n0texpecterr0r.rhapsody.engine;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.widget.ImageView;
 
@@ -16,11 +15,18 @@ public interface BaseEngine {
      * 加载缩略图
      * @param context 上下文
      * @param size 缩略图尺寸(固定1:1)
-     * @param drawable
-     * @param imageView
-     * @param uri
+     * @param imageView 要加载的ImageView
+     * @param uri 图片的uri
      */
-    void loadThumbnail(Context context, int size,Drawable drawable, ImageView imageView, Uri uri);
+    void loadThumbnail(Context context, int size, ImageView imageView, Uri uri);
 
+    /**
+     * 加载图片
+     * @param context 上下文
+     * @param sizeX X方向图片大小
+     * @param sizeY Y方向图片大小
+     * @param imageView 要加载的ImageView
+     * @param uri 图片uri
+     */
     void loadImage(Context context, int sizeX, int sizeY, ImageView imageView, Uri uri);
 }
