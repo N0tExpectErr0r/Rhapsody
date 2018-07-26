@@ -1,58 +1,40 @@
 package com.n0texpecterr0r.rhapsody;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.Toast;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import com.n0texpecterr0r.rhapsody.engine.impl.RhaposdyEngine;
+import android.widget.ImageView;
+import com.n0texpecterr0r.rhapsody.bean.Floder;
+import com.n0texpecterr0r.rhapsody.loader.RhapsodyLoader;
+import java.util.List;
 
 /**
  * @author Created by Nullptr
  * @date 2018/7/25 10:07
- * @describe 选择的图片的类型枚举
+ * @describe 选择图片界面
  */
-public class SelectActivity extends AppCompatActivity {
-    private static final int PERMISSIONS_READ_STORAGE = 233;
+public class SelectActivity extends AppCompatActivity implements SelectView{
+    private SelectConfig mConfig;
+    private List<Floder> mFloders;
+    private ImageView mImageView;
+    private SelectModel mModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select);
-        checkStoragePression();
+        mImageView = findViewById(R.id.iv_image);
+        mModel = new SelectModel(getContentResolver(),this);
+        mModel.getFloderList();
+        mConfig = SelectConfig.getInstance();
+
     }
 
-    /**
-     * android6.0动态权限申请：SD卡读写权限
-     */
-    public void checkStoragePression() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            int checkResult = ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            if (checkResult != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                        PERMISSIONS_READ_STORAGE);
-            }
-        }
-    }
-
-    /**
-     * 权限申请回调
-     */
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-            @NonNull int[] grantResults) {
-        boolean permit = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
-        switch (requestCode) {
-            case PERMISSIONS_READ_STORAGE:
-                if (!permit) {
-                    Toast.makeText(this,"需要读取权限才可正常使用",Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-                break;
-        }
+    public void onFloder(List<Floder> floders) {
+        mFloders = floders;
+        String picPath = mModel.getImageFromFloder(floders.get(0)).get(0);
+        RhapsodyLoader.get().load(floders.get(0).getDir()+"/"+picPath).into(mImageView);
     }
 }

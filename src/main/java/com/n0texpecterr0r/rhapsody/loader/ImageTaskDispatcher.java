@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.util.LruCache;
 import android.widget.ImageView;
 
@@ -16,8 +17,7 @@ import android.widget.ImageView;
  */
 public class ImageTaskDispatcher {
 
-    private Context mContext;               // 上下文
-    private Uri mUri;                       // 图片uri
+    private String mPath;                    // 图片路径
     private int mTargetWidth;               // 目标图片宽度
     private int mTargetHeight;              // 目标图片高度
     private ImageView mImageView;           // 目标ImageView
@@ -28,11 +28,10 @@ public class ImageTaskDispatcher {
     /**
      * 构造函数
      *
-     * @param uri 图片的uri
+     * @param path 图片的path
      */
-    ImageTaskDispatcher(Uri uri,Context context) {
-        mUri = uri;
-        mContext = context;
+    ImageTaskDispatcher(String path) {
+        mPath = path;
         mUIHandler = new Handler(Looper.getMainLooper());
         mDispatcher = TaskDispatcher.getInstance();
         mTargetWidth = 0;
@@ -66,7 +65,7 @@ public class ImageTaskDispatcher {
     public void into(ImageView imageView){
         mImageView = imageView;
         // 1.先查看内存缓存
-        Bitmap bitmap = sImageCache.get(mUri.getPath());
+        Bitmap bitmap = sImageCache.get(mPath);
         if (bitmap != null){
             // 找到图片
             imageView.setImageBitmap(bitmap);
@@ -78,8 +77,7 @@ public class ImageTaskDispatcher {
         Runnable loadTask = new Runnable() {
             @Override
             public void run() {
-
-                Bitmap localBitmap = BitmapUtil.getBitmapFromUri(mContext, mUri);
+                Bitmap localBitmap = BitmapUtil.getBitmapFromPath(mPath);
                 if (mTargetWidth != 0 && mTargetHeight != 0) {
                     // 如果设置了大小,对图片进行缩放
                     assert localBitmap != null;
@@ -92,7 +90,7 @@ public class ImageTaskDispatcher {
                         mImageView.setImageBitmap(finalBitmap);
                     }
                 });
-                sImageCache.put(mUri.getPath(),finalBitmap);
+                sImageCache.put(mPath,finalBitmap);
             }
         };
         mDispatcher.executeTask(loadTask);

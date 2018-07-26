@@ -38,6 +38,16 @@ public class BitmapUtil {
     }
 
     /**
+     * 从图片路径获取图片
+     * @param imagePath 图片路径
+     * @return 得到的bitmap
+     */
+    public static Bitmap getBitmapFromPath(String imagePath){
+        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+        return bitmap;
+    }
+
+    /**
      * 图片质量压缩
      *
      * @param image 要压缩的图片

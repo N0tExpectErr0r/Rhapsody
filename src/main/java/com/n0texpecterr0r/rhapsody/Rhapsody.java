@@ -1,11 +1,8 @@
 package com.n0texpecterr0r.rhapsody;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
+import com.n0texpecterr0r.rhapsody.bean.ImageType;
 import java.lang.ref.WeakReference;
 import java.util.Set;
 
@@ -64,11 +61,12 @@ public class Rhapsody {
     }
 
     /**
-     * 设置选择图片的格式
-     * @param imageTypes 图片格式的Set，需要用ImageType.of方法创建
+     * 设置图片选择格式
+     * @param type 类型
+     * @param rest 剩余类型
      */
-    public SelectorBuilder setImageType(Set<ImageType> imageTypes){
-        return new SelectorBuilder(this,imageTypes);
+    public SelectCreator setImageType(ImageType type, ImageType... rest){
+        return new SelectCreator(this,ImageType.of(type,rest));
     }
 
     /**

@@ -1,8 +1,11 @@
 package com.n0texpecterr0r.rhapsody;
 
-import static com.n0texpecterr0r.rhapsody.ImageType.JPEG;
-import static com.n0texpecterr0r.rhapsody.ImageType.PNG;
+import static com.n0texpecterr0r.rhapsody.bean.ImageType.JPEG;
+import static com.n0texpecterr0r.rhapsody.bean.ImageType.PNG;
 
+import com.n0texpecterr0r.rhapsody.bean.ImageType;
+import com.n0texpecterr0r.rhapsody.engine.ImageEngine;
+import com.n0texpecterr0r.rhapsody.engine.impl.RhaposdyEngine;
 import java.util.Set;
 
 /**
@@ -12,10 +15,11 @@ import java.util.Set;
  */
 public final class SelectConfig {
 
-    public Set<ImageType> imageTypes;               //图片类型 默认全部
-    public int maxSelectCount;                      //最大选择图片 默认1
-    public float thumbnailScale;                    //缩略图缩放比例 默认0.5F
-    private volatile static SelectConfig sInstance; //实例
+    public Set<ImageType> imageTypes;               // 图片类型 默认全部
+    public int maxSelectCount;                      // 最大选择图片 默认1
+    public float thumbnailScale;                    // 缩略图缩放比例 默认0.5F
+    public ImageEngine mEngine;                      // 图片加载引擎 默认为Rhapsody自带引擎
+    private volatile static SelectConfig sInstance; // 实例
 
     /**
      * 防止外部调用构造方法
@@ -57,7 +61,6 @@ public final class SelectConfig {
         imageTypes = ImageType.of(JPEG, PNG);
         maxSelectCount = 1;
         thumbnailScale = 0.5F;
+        mEngine = new RhaposdyEngine();
     }
-
-
 }

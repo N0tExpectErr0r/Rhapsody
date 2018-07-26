@@ -1,4 +1,4 @@
-package com.n0texpecterr0r.rhapsody;
+package com.n0texpecterr0r.rhapsody.bean;
 
 import android.support.v4.util.ArraySet;
 import java.util.Arrays;
@@ -48,4 +48,11 @@ public enum ImageType {
         return EnumSet.of(type, rest);
     }
 
+    public String getTypeName() {
+        return mTypeName;
+    }
+
+    public Set<String> getExtensions() {
+        return mExtensions;
+    }
 }
