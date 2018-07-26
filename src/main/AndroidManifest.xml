@@ -3,7 +3,7 @@
     package="com.n0texpecterr0r.rhapsody">
 
     <application>
-        <activity android:name=".SelectActivity">
+        <activity android:name=".view.SelectActivity">
         </activity>
     </application>
 

@@ -3,6 +3,7 @@ package com.n0texpecterr0r.rhapsody.loader;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -39,12 +40,57 @@ public class BitmapUtil {
 
     /**
      * 从图片路径获取图片
+     *
      * @param imagePath 图片路径
      * @return 得到的bitmap
      */
-    public static Bitmap getBitmapFromPath(String imagePath){
-        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-        return bitmap;
+    public static Bitmap getBitmapFromPath(String imagePath, int width, int height) {
+        Bitmap bitmap = null;
+        BitmapFactory.Options options = new Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(imagePath, options);
+        if (width != 0 && height != 0) {
+            // 缩放为指定大小
+            options.inSampleSize = calculateInSampleSize(options, width, height);
+        }else if (width == 0 && height!=0){
+            // 以高度为衡量标准缩放为正方形
+            options.inSampleSize = calculateInSampleSize(options,height,height);
+        }else if (height == 0 && width!=0){
+            // 以宽度为衡量标准缩放为正方形
+            options.inSampleSize = calculateInSampleSize(options,width,width);
+        }
+        options.inJustDecodeBounds = false;
+
+        return BitmapFactory.decodeFile(imagePath,options);
+    }
+
+    /**
+     * 计算Option的宽高
+     *
+     * @param options 对应option
+     * @param reqWidth 需要的宽
+     * @param reqHeight 需要的高
+     * @return 计算结果
+     */
+    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // 原始图片的宽高
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // 在保证解析出的bitmap宽高分别大于目标尺寸宽高的前提下，取可能的inSampleSize的最大值
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
     }
 
     /**
@@ -70,25 +116,26 @@ public class BitmapUtil {
     }
 
     /**
-     * 对图片进行缩放
+     * 对图片进行等比例缩放
+     *
      * @param bitmap 要缩放的图片
      * @param newWidth 目标宽度
-     * @param newHeight 目标高度
      * @return 缩放后图片
      */
-    public static Bitmap scaleBitmap(Bitmap bitmap, int newWidth, int newHeight) {
+    public static Bitmap scaleBitmap(Bitmap bitmap, int newWidth) {
 
         // 获得图片的宽高
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
         // 计算缩放比例
+        float newHeight = newWidth * height / width;
         float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = ((float) newHeight) / height;
+        float scaleHeight = newHeight / height;
         // 取得想要缩放的matrix参数
         Matrix matrix = new Matrix();
         matrix.postScale(scaleWidth, scaleHeight);
         // 得到新的图片
-        Bitmap outBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix,true);
+        Bitmap outBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
         return outBitmap;
     }
 

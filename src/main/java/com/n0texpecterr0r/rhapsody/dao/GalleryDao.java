@@ -1,4 +1,4 @@
-package com.n0texpecterr0r.rhapsody;
+package com.n0texpecterr0r.rhapsody.dao;
 
 import android.content.ContentResolver;
 import android.database.Cursor;

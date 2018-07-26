@@ -1,4 +1,4 @@
-package com.n0texpecterr0r.rhapsody;
+package com.n0texpecterr0r.rhapsody.view;
 
 import com.n0texpecterr0r.rhapsody.bean.Floder;
 import java.util.List;

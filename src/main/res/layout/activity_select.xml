@@ -2,13 +2,23 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/iv_image"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/select_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:title="请选择图片"/>
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/select_rv_gallery"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#333333"/>
 
 </LinearLayout> 

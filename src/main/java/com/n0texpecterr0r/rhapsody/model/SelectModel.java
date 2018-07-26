@@ -1,16 +1,16 @@
-package com.n0texpecterr0r.rhapsody;
+package com.n0texpecterr0r.rhapsody.model;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.MediaStore.Images.Media;
+import com.n0texpecterr0r.rhapsody.ImageNameFilter;
+import com.n0texpecterr0r.rhapsody.SelectConfig;
+import com.n0texpecterr0r.rhapsody.view.SelectView;
 import com.n0texpecterr0r.rhapsody.bean.Floder;
-import com.n0texpecterr0r.rhapsody.bean.ImageType;
+import com.n0texpecterr0r.rhapsody.dao.GalleryDao;
 import java.io.File;
-import java.io.FilenameFilter;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -84,20 +84,24 @@ public class SelectModel {
     }
 
     /**
-     * 获取指定文件夹的图片名称列表
+     * 获取指定文件夹的图片路径列表
      * @param floder 指定文件夹
-     * @return 文件夹中包含的图片的名称集合
+     * @return 文件夹中包含的图片的路径集合
      */
     public List<String> getImageFromFloder(Floder floder){
         File floderFile = new File(floder.getDir());
         String[] imageNames = floderFile.list(new ImageNameFilter(mConfig.imageTypes));
-        return Arrays.asList(imageNames);
+        List<String> paths = new ArrayList<>();
+        for (String imageName : imageNames) {
+            paths.add(floder.getDir()+"/"+imageName);
+        }
+        return paths;
     }
 
     /**
-     * 获取所有图片的名称列表
+     * 获取文件夹列表中所有图片的路径列表
      * @param floders 文件夹的集合
-     * @return 所有文件夹中包含的所有图片的名称
+     * @return 所有文件夹中包含的所有图片的名路径
      */
     public List<String> getImageFromFloderList(List<Floder> floders){
         List<String> paths = new ArrayList<>();

@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import com.n0texpecterr0r.rhapsody.bean.ImageType;
 import com.n0texpecterr0r.rhapsody.engine.ImageEngine;
+import com.n0texpecterr0r.rhapsody.view.SelectActivity;
 import java.util.Set;
 
 /**

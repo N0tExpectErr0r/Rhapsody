@@ -34,7 +34,7 @@ public class RhapsodyLoader {
      *
      * @param path 图片的path
      */
-    public ImageTaskDispatcher load(String path) {
-        return new ImageTaskDispatcher(path);
+    public ImageTaskCreator load(String path) {
+        return new ImageTaskCreator(path);
     }
 }
