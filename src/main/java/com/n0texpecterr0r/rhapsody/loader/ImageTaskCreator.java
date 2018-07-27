@@ -5,10 +5,8 @@ import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 import android.util.LruCache;
 import android.widget.ImageView;
-import com.n0texpecterr0r.rhapsody.loader.TaskDispatcher.Type;
 
 
 /**
@@ -18,7 +16,7 @@ import com.n0texpecterr0r.rhapsody.loader.TaskDispatcher.Type;
  */
 public class ImageTaskCreator {
 
-    private String mPath;                    // 图片路径
+    private String mPath;                   // 图片路径
     private int mTargetWidth;               // 目标图片宽度
     private int mTargetHeight;              // 目标图片高度
     private Handler mUIHandler;             // 主线程Handler，用于回调
@@ -42,18 +40,19 @@ public class ImageTaskCreator {
                 //防止错乱，比较tag后再进行设置
                 if (imgView.getTag().toString().equals(path)) {
                     imgView.setImageBitmap(bitmap);
-                    ObjectAnimator.ofFloat(imgView,"alpha",0F,1F)
-                            .setDuration(500)
+                    //加载成功动画
+                    ObjectAnimator.ofFloat(imgView, "alpha", 0F, 1F)
+                            .setDuration(250)
                             .start();
                     addBitmapToMemoryCache(path, bitmap);
                 }
             }
         };
-        mDispatcher = TaskDispatcher.getInstance(4, Type.LIFO);
+        mDispatcher = TaskDispatcher.getInstance();
         mTargetWidth = 0;
         mTargetHeight = 0;
 
-        int memory = (int) (Runtime.getRuntime().maxMemory()/4);   // 取1/4内存存储图片
+        int memory = (int) (Runtime.getRuntime().maxMemory() / 4);   // 取1/4内存存储图片
 
         if (sImageCache == null) {
             sImageCache = new LruCache<String, Bitmap>(memory) {
@@ -100,7 +99,7 @@ public class ImageTaskCreator {
         Runnable loadTask = new Runnable() {
             @Override
             public void run() {
-                Bitmap localBitmap = BitmapUtil.getBitmapFromPath(mPath,mTargetWidth,mTargetHeight);
+                Bitmap localBitmap = BitmapUtil.getBitmapFromPath(mPath, mTargetWidth, mTargetHeight);
 
                 ImageHolder imageHolder = new ImageHolder(localBitmap, imageView, path);
                 Message message = Message.obtain();
@@ -115,10 +114,14 @@ public class ImageTaskCreator {
 
     /**
      * 将图片加入内存缓存
+     *
      * @param key key
      * @param bitmap bitmap
      */
     private synchronized void addBitmapToMemoryCache(String key, Bitmap bitmap) {
+        if (key == null || bitmap == null) {
+            return;
+        }
         if (getBitmapFromMemoryCache(key) == null) {
             sImageCache.put(key, bitmap);  //图片没有放入时将图片放入内存
         }
@@ -127,6 +130,7 @@ public class ImageTaskCreator {
 
     /**
      * 从内存缓存获取图片
+     *
      * @param key key
      * @return 得到的图片
      */
@@ -138,6 +142,7 @@ public class ImageTaskCreator {
      * 为了防止图片错乱，在message内判断后再加载图片
      */
     private class ImageHolder {
+
         Bitmap bitmap;
         ImageView imageView;
         String path;

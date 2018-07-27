@@ -1,6 +1,7 @@
 package com.n0texpecterr0r.rhapsody.loader;
 
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import java.util.LinkedList;
@@ -17,10 +18,9 @@ public class TaskDispatcher {
 
     private LinkedList<Runnable> mTaskList;         // 任务队列（LinkedList可以取头和尾）
     private ExecutorService mThreadPool;            // 线程池
-    private Thread mPollingThead;            // 轮询线程
     private static final String POLLING_THREAD_NAME = "polling_thread"; // 轮询线程的默认名称
-    private Handler mPollingHandler;                 // 轮询线程中的Handler
-    private static final int DEFAULT_THREAD_COUNT = 1;  // 默认线程数量
+    private Handler mPollingHandler;                // 轮询线程中的Handler
+    private static final int DEFAULT_THREAD_COUNT = 5;  // 默认线程数量
     private Type mType = Type.LIFO;                 // 队列的调度方式，默认为LIFO
     //用volatile保证可见性
     private volatile Semaphore mPollingSemaphore;   // 信号量，由于线程池内部也有一个阻塞线程，若加入任务的速度过快，LIFO效果不明显
@@ -84,7 +84,8 @@ public class TaskDispatcher {
         mType = type == null ? Type.LIFO : type;
 
         // 开启轮询线程
-        mPollingThead = new Thread(POLLING_THREAD_NAME) {
+        // 轮询线程
+        Thread pollingThead = new Thread(POLLING_THREAD_NAME) {
             @Override
             public void run() {
                 Looper.prepare();
@@ -103,7 +104,7 @@ public class TaskDispatcher {
                 Looper.loop();
             }
         };
-        mPollingThead.start();
+        pollingThead.start();
     }
 
     /**

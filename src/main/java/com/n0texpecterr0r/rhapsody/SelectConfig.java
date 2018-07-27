@@ -18,7 +18,7 @@ public final class SelectConfig {
     public Set<ImageType> imageTypes;               // 图片类型 默认全部
     public int maxSelectCount;                      // 最大选择图片 默认1
     public float thumbnailScale;                    // 缩略图缩放比例 默认0.5F
-    public ImageEngine mEngine;                      // 图片加载引擎 默认为Rhapsody自带引擎
+    public ImageEngine mEngine;                     // 图片加载引擎 默认为Rhapsody自带引擎
     private volatile static SelectConfig sInstance; // 实例
 
     /**
