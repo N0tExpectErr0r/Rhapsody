@@ -142,7 +142,6 @@ public class ImageTaskCreator {
      * 为了防止图片错乱，在message内判断后再加载图片
      */
     private class ImageHolder {
-
         Bitmap bitmap;
         ImageView imageView;
         String path;

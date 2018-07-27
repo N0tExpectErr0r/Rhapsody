@@ -6,7 +6,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -136,12 +135,15 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> implemen
         int position = (int) v.getTag();
     }
 
+    /**
+     * Gallery的ViewHolder类
+     */
     class ImageViewHolder extends ViewHolder {
 
         private CheckBox mCheckBox;
         private ImageView mImageView;
 
-        public ImageViewHolder(View itemView) {
+        ImageViewHolder(View itemView) {
             super(itemView);
             mCheckBox = itemView.findViewById(R.id.item_cb_select);
             mImageView = itemView.findViewById(R.id.item_iv_image);
