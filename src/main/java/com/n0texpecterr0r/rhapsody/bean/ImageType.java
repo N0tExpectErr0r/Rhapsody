@@ -12,7 +12,8 @@ import java.util.Set;
  */
 public enum ImageType {
     JPEG("image/jpeg", arraySetOf("jpg", "jpeg")),
-    PNG("image/png",arraySetOf("png"));
+    PNG("image/png",arraySetOf("png")),
+    GIF("image/gif",arraySetOf("gif"));
 
     //类型名
     private final String mTypeName;

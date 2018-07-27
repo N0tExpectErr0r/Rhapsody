@@ -3,6 +3,7 @@ package com.n0texpecterr0r.rhapsody.adapter;
 import static android.graphics.Color.argb;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
@@ -18,6 +19,7 @@ import com.n0texpecterr0r.rhapsody.R;
 import com.n0texpecterr0r.rhapsody.SelectConfig;
 import com.n0texpecterr0r.rhapsody.adapter.ImageAdapter.ImageViewHolder;
 import com.n0texpecterr0r.rhapsody.engine.ImageEngine;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,9 +30,9 @@ import java.util.List;
 public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> implements OnClickListener {
 
     private List<String> mPaths;                // 图片的路径集合
-    private SparseBooleanArray mCheckStatus;    // 存储勾选框状态的map集合
     private int mCheckCount;                    // 选择个数
     private ImageEngine mImageEngine;           // 加载图片的引擎
+    private SparseBooleanArray mCheckStatus;    // 存储勾选框状态的map集合
     private int mMaxCheckCount;                 // 最大选择个数
     private Context mContext;                   // 上下文
     private float mScaleValue;                  // 缩略图缩放比例
@@ -80,7 +82,6 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> implemen
         final ImageView imageView = holder.mImageView;
 
         imageView.setImageResource(R.drawable.mock);
-
         holder.itemView.setTag(position);
 
         // 计算缩放后的尺寸
@@ -93,7 +94,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> implemen
         checkBox.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View buttonView) {
-
+                // 点击checkbox，判断是否要改变状态
                 boolean isChecked = checkBox.isChecked();
                 if (mCheckCount != mMaxCheckCount || !isChecked) {
                     // 不是添加或者没有超过最大选择数时
@@ -113,6 +114,13 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> implemen
                     Toast.makeText(mContext, "最多只能选择" + mMaxCheckCount + "张图片",
                             Toast.LENGTH_SHORT).show();
                 }
+
+                // 发送选中数量的广播
+                Intent intent = new Intent();
+                intent.setAction("select_image");
+                intent.putExtra("type","select_change");
+                intent.putExtra("select_num",mCheckCount);
+                mContext.sendBroadcast(intent);
             }
         });
 

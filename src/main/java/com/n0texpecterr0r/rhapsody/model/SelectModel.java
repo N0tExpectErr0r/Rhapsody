@@ -43,24 +43,24 @@ public class SelectModel {
                 List<Floder> floders = new ArrayList<>();   // 用于返回文件夹列表
                 Cursor cursor = mGalleryDao.getGalleryCursor();
                 // 防止重复扫描路径，用一个set保存
-                Set<String> mDirPaths = new HashSet<>();
+                Set<String> dirPaths = new HashSet<>();
                 while (cursor.moveToNext()) {
                     // 扫描图片，获取图片路径
                     String path = cursor.getString(cursor.getColumnIndex(Media.DATA));  //获取图片路径
                     File parentFile = new File(path).getParentFile();
-                    if (parentFile == null) {
-                        continue;
-                    }
+
+                    // 获取父文件夹
+                    if (parentFile == null)     continue;
                     String dirPath = parentFile.getAbsolutePath();
                     Floder floder = null;
 
                     // 检查是否已经保存
-                    if (mDirPaths.contains(dirPath)) {
+                    if (dirPaths.contains(dirPath)) {
                         // 已经保存过，不再继续添加
                         continue;
                     } else {
                         //未保存，添加并初始化floder
-                        mDirPaths.add(dirPath);
+                        dirPaths.add(dirPath);
                         floder = new Floder();
                         floder.setDir(dirPath);
                         floder.setCoverPath(path);
