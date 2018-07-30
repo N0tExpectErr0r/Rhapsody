@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- PopupWindow弹出/隐藏动画 -->
     <style name="pop_anim_style">
         <item name="android:windowEnterAnimation">@anim/popupwindow_show_anim</item>
         <item name="android:windowExitAnimation">@anim/popupwindow_hidden_anim</item>

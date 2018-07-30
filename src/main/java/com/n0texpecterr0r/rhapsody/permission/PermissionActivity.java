@@ -16,7 +16,7 @@ import com.n0texpecterr0r.rhapsody.R;
 /**
  * @author Created by Nullptr
  * @date 2018/7/30 10:07
- * @describe 权限申请界面
+ * @describe 权限处理界面
  */
 public class PermissionActivity extends AppCompatActivity {
     public static final int PERMISSIONS_GRANTED = 0;                // 权限授权

@@ -2,6 +2,7 @@ package com.n0texpecterr0r.rhapsody.dao;
 
 import static android.provider.MediaStore.Images.ImageColumns.DATE_TAKEN;
 import static android.provider.MediaStore.MediaColumns.DATE_ADDED;
+import static android.provider.MediaStore.MediaColumns.DATE_MODIFIED;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
@@ -40,9 +41,8 @@ public class GalleryDao {
         }
         String[] argArr = new String[mConfig.imageTypes.size()];
         args.toArray(argArr);
-        Cursor cursor = mResolver.query(imageUri, null,
+        return mResolver.query(imageUri, null,
                 getSelection(), argArr, DATE_ADDED);
-        return cursor;
     }
 
     /**

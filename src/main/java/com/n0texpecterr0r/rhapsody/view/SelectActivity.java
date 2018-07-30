@@ -13,10 +13,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
+import android.widget.PopupWindow.OnDismissListener;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.n0texpecterr0r.rhapsody.R;
@@ -29,6 +32,7 @@ import com.n0texpecterr0r.rhapsody.permission.PermissionActivity;
 import com.n0texpecterr0r.rhapsody.permission.PermissionChecker;
 import com.n0texpecterr0r.rhapsody.view.ui.FloderPopWindow;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,6 +43,7 @@ import java.util.List;
 public class SelectActivity extends AppCompatActivity implements SelectView {
 
     private static final int REQUEST_PERMISSION_CODE = 0;  // 请求权限Code
+    private List<String> mAllImages;        // 所有图片的List
     private List<Floder> mFloders;          // Floder列表
     private ProgressBar mPbLoading;         // 加载进度View
     private SelectModel mModel;             // 加载数据Model层
@@ -77,16 +82,26 @@ public class SelectActivity extends AppCompatActivity implements SelectView {
         // 初始化选择文件夹列表
         mTvFloderName = findViewById(R.id.select_tv_floder_name);
         mFloderWindow = new FloderPopWindow(SelectActivity.this);
+        mFloderWindow.setOnDismissListener(new OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                // 设置背景颜色变亮
+                WindowManager.LayoutParams params = getWindow().getAttributes();
+                params.alpha = 1f;
+                getWindow().setAttributes(params);
+            }
+        });
 
+        // 准备数据加载
         mPbLoading = findViewById(R.id.select_pb_loading);
         mModel = new SelectModel(getContentResolver(), this);
-        
+
         // 缺少权限时, 进入权限配置页面
         PermissionChecker checker = new PermissionChecker(this);
         if (checker.lackPermissions(READ_EXTERNAL_STORAGE)) {
             PermissionActivity.startActivityForResult(this,
                     REQUEST_PERMISSION_CODE, READ_EXTERNAL_STORAGE);
-        }else{
+        } else {
             mModel.getFloderList();
         }
 
@@ -94,15 +109,16 @@ public class SelectActivity extends AppCompatActivity implements SelectView {
         mUIHandler = new Handler(Looper.getMainLooper());
     }
 
-    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode){
+        switch (requestCode) {
             case REQUEST_PERMISSION_CODE:
                 // 请求权限回调
                 if (resultCode == PermissionActivity.PERMISSIONS_DENIED) {
                     // 拒绝时, 关闭页面
                     finish();
-                }else{
+                } else {
                     // 接收了，加载数据
                     mModel.getFloderList();
                 }
@@ -139,6 +155,7 @@ public class SelectActivity extends AppCompatActivity implements SelectView {
 
     /**
      * 获取到文件夹列表的回调
+     *
      * @param floders 获取到的文件夹列表
      */
     @Override
@@ -157,9 +174,15 @@ public class SelectActivity extends AppCompatActivity implements SelectView {
                 mFloderWindow.setOnItemClickListener(new OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        // 将对应文件夹所有图片应用于图库
-                        mModel.getImageFromFloderSync(mFloders.get(position));
+                        if (position == 0) {
+                            // 如果是全部图片
+                            mAdapter.setPaths(mAllImages);
+                        }else {
+                            // 将对应文件夹所有图片应用于图库
+                            mModel.getImageFromFloderSync(mFloders.get(position));
+                        }
                         mTvFloderName.setText(mFloders.get(position).getName());
+                        mFloderWindow.dismiss();
                     }
                 });
                 // 初始化文件夹名Spinner
@@ -167,7 +190,11 @@ public class SelectActivity extends AppCompatActivity implements SelectView {
                     @Override
                     public void onClick(View v) {
                         // 展示PopupWindow
-                        mFloderWindow.showUp(mTvFloderName);
+                        mFloderWindow.show(mTvFloderName);
+                        // 设置背景颜色变暗
+                        WindowManager.LayoutParams params = getWindow().getAttributes();
+                        params.alpha = 0.6f;
+                        getWindow().setAttributes(params);
                     }
                 });
             }
@@ -176,10 +203,23 @@ public class SelectActivity extends AppCompatActivity implements SelectView {
 
     /**
      * 获取到图片列表的回调
+     *
      * @param imagePaths 图片路径列表
      */
     @Override
     public void onImages(final List<String> imagePaths) {
+        mUIHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.setPaths(imagePaths);
+            }
+        });
+    }
+
+    @Override
+    public void onAllImages(final List<String> imagePaths) {
+        Collections.reverse(imagePaths);
+        mAllImages = imagePaths;
         mUIHandler.post(new Runnable() {
             @Override
             public void run() {

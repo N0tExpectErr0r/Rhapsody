@@ -11,9 +11,12 @@ import com.n0texpecterr0r.rhapsody.view.SelectView;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -23,28 +26,32 @@ import java.util.concurrent.Executors;
  */
 public class SelectModel {
 
-    private GalleryDao mGalleryDao;     // Dao层，与ContentProvider交互，获取Cursor
-    private SelectConfig mConfig;       // 选择配置
-    private SelectView mSelectView;     // 选择图片的View的接口，用于回调数据
+    private GalleryDao mGalleryDao;             // Dao层，与ContentProvider交互，获取Cursor
+    private SelectConfig mConfig;               // 选择配置
+    private SelectView mSelectView;             // 选择图片的View的接口，用于回调数据
+    private ExecutorService mExecutorService;   // 线程池
 
     public SelectModel(ContentResolver resolver, SelectView selectView) {
         mGalleryDao = new GalleryDao(resolver);
         mConfig = SelectConfig.getInstance();
         mSelectView = selectView;
+        mExecutorService = Executors.newFixedThreadPool(3);
     }
 
     /**
      * 获取文件夹列表，通过接口回调
      */
     public void getFloderList() {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
+        mExecutorService.execute(new Runnable() {
             @Override
             public void run() {
-                List<Floder> floders = new ArrayList<>();   // 用于返回文件夹列表
+                LinkedList<Floder> floders = new LinkedList<>();   // 用于返回文件夹列表
                 Cursor cursor = mGalleryDao.getGalleryCursor();
                 // 防止重复扫描路径，用一个set保存
                 Set<String> dirPaths = new HashSet<>();
+                int picsCount = 0;
                 while (cursor.moveToNext()) {
+                    picsCount++;
                     // 扫描图片，获取图片路径
                     String path = cursor.getString(cursor.getColumnIndex(Media.DATA));  //获取图片路径
                     File parentFile = new File(path).getParentFile();
@@ -79,6 +86,14 @@ public class SelectModel {
                     floder.setPictureCount(picCount);
                     floders.add(floder);
                 }
+                // 新建全部图片文件夹
+                Floder mainFloder = new Floder();
+                mainFloder.setDir("/全部图片");
+                mainFloder.setPictureCount(picsCount);
+                mainFloder.setCoverPath(floders.get(0).getCoverPath());
+                // 插入文件夹到头部
+                floders.addFirst(mainFloder);
+
                 cursor.close(); // 关闭cursor
                 mSelectView.onFloder(floders);
             }
@@ -91,7 +106,7 @@ public class SelectModel {
      * @param floder 指定文件夹
      */
     public void getImageFromFloderSync(final Floder floder) {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
+        mExecutorService.execute(new Runnable() {
             @Override
             public void run() {
                 File floderFile = new File(floder.getDir());
@@ -100,6 +115,7 @@ public class SelectModel {
                 for (String imageName : imageNames) {
                     paths.add(floder.getDir() + "/" + imageName);
                 }
+                Collections.reverse(paths);
                 mSelectView.onImages(paths);
             }
         });
@@ -119,6 +135,7 @@ public class SelectModel {
         for (String imageName : imageNames) {
             paths.add(floder.getDir() + "/" + imageName);
         }
+        Collections.reverse(paths);
         return paths;
     }
 
@@ -128,26 +145,32 @@ public class SelectModel {
      * @param floders 文件夹的集合
      */
     public void getImageFromFloderList(final List<Floder> floders) {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
+        mExecutorService.execute(new Runnable() {
             @Override
             public void run() {
                 List<String> paths = new ArrayList<>();
-                for (Floder floder : floders) {
-                    List<String> tempList = getImageFromFloder(floder);
-                    paths.addAll(tempList);
+                for (int i=0;i<floders.size();i++) {
+                    if (i != 0) {
+                        // 除去全部图片文件夹
+                        Floder floder = floders.get(i);
+                        paths.addAll(getImageFromFloder(floder));
+                    }
                 }
-                mSelectView.onImages(paths);
+                Collections.reverse(paths);
+                mSelectView.onAllImages(paths);
             }
         });
     }
+
 
     /**
      * 图片名称过滤器
      */
     class ImageNameFilter implements FilenameFilter {
+
         private Set<ImageType> mImageTypes;
 
-        public ImageNameFilter(Set<ImageType> imageTypes){
+        public ImageNameFilter(Set<ImageType> imageTypes) {
             mImageTypes = imageTypes;
         }
 

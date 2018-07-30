@@ -1,6 +1,7 @@
 package com.n0texpecterr0r.rhapsody.view;
 
 import com.n0texpecterr0r.rhapsody.bean.Floder;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -21,4 +22,10 @@ public interface SelectView {
      * @param imagePaths 收到的图片地址列表
      */
     void onImages(List<String> imagePaths);
+
+    /**
+     * 接收到所有图片的地址的回调
+     * @param imagePaths 收到的图片地址列表
+     */
+    void onAllImages(List<String> imagePaths);
 }

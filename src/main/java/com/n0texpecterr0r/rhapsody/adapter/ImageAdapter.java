@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +20,10 @@ import com.n0texpecterr0r.rhapsody.R;
 import com.n0texpecterr0r.rhapsody.SelectConfig;
 import com.n0texpecterr0r.rhapsody.adapter.ImageAdapter.ImageViewHolder;
 import com.n0texpecterr0r.rhapsody.engine.ImageEngine;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Created by Nullptr
@@ -31,7 +35,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> implemen
     private List<String> mPaths;                // 图片的路径集合
     private int mCheckCount;                    // 选择个数
     private ImageEngine mImageEngine;           // 加载图片的引擎
-    private SparseBooleanArray mCheckStatus;    // 存储勾选框状态的map集合
+    private List<String> mCheckedImages;        // 存储勾选框状态的map集合
     private int mMaxCheckCount;                 // 最大选择个数
     private Context mContext;                   // 上下文
     private float mScaleValue;                  // 缩略图缩放比例
@@ -42,10 +46,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> implemen
         mScaleValue = SelectConfig.getInstance().thumbnailScale;
         mMaxCheckCount = SelectConfig.getInstance().maxSelectCount;
 
-        mCheckStatus = new SparseBooleanArray();
-        for (int i = 0; i < mPaths.size(); i++) {
-            mCheckStatus.put(i, false);
-        }
+        mCheckedImages = new ArrayList<>();
 
         mContext = context;
     }
@@ -58,19 +59,6 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> implemen
     public void setPaths(List<String> paths) {
         mPaths = paths;
         notifyDataSetChanged();
-
-        // 重新初始化状态
-        mCheckStatus = new SparseBooleanArray();
-        for (int i = 0; i < mPaths.size(); i++) {
-            mCheckStatus.put(i, false);
-        }
-        mCheckCount = 0;
-        // 更新UI
-        Intent intent = new Intent();
-        intent.setAction("select_image");
-        intent.putExtra("type","select_change");
-        intent.putExtra("select_num",mCheckCount);
-        mContext.sendBroadcast(intent);
     }
 
     @NonNull
@@ -92,10 +80,17 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> implemen
         // 计算缩放后的尺寸
         int screenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
         float size = screenWidth * mScaleValue / 4;   // 计算缩略图的大小
-        String path = mPaths.get(position);
+        final String path = mPaths.get(position);
         mImageEngine.loadThumbnail(mContext, (int) size, holder.mImageView, path);
 
-        // 如果还没有添加过点击事件
+        // 恢复checkbox状态
+        checkBox.setChecked(mCheckedImages.contains(path));
+        if (checkBox.isChecked()) {
+            imageView.setColorFilter(argb(70, 0, 0, 0));
+        } else {
+            imageView.setColorFilter(null);
+        }
+
         checkBox.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View buttonView) {
@@ -103,13 +98,14 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> implemen
                 boolean isChecked = checkBox.isChecked();
                 if (mCheckCount != mMaxCheckCount || !isChecked) {
                     // 不是添加或者没有超过最大选择数时
-                    mCheckStatus.put(position, isChecked);
                     if (isChecked) {
                         // 选择，添加灰色蒙版，并且添加checkCount
+                        mCheckedImages.add(path);
                         mCheckCount++;
                         imageView.setColorFilter(argb(70, 0, 0, 0));
                     } else {
                         // 取消选择，去除蒙版，并且减少checkCount
+                        mCheckedImages.remove(path);
                         mCheckCount--;
                         imageView.setColorFilter(null);
                     }
@@ -125,12 +121,6 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> implemen
             }
         });
 
-        checkBox.setChecked(mCheckStatus.get(position));
-        if (checkBox.isChecked()) {
-            imageView.setColorFilter(argb(70, 0, 0, 0));
-        } else {
-            imageView.setColorFilter(null);
-        }
     }
 
     private void sendBroadcastUpdateUI() {

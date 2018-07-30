@@ -41,6 +41,7 @@
             android:gravity="left|center_vertical"
             android:padding="16dp"
             android:textColor="#fff"
+            android:drawableRight="@drawable/ic_floder"
             android:text="所有图片"/>
     </LinearLayout>
 </FrameLayout>

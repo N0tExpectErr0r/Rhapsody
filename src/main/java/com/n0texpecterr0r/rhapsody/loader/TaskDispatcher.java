@@ -20,7 +20,7 @@ public class TaskDispatcher {
     private ExecutorService mThreadPool;            // 线程池
     private static final String POLLING_THREAD_NAME = "polling_thread"; // 轮询线程的默认名称
     private Handler mPollingHandler;                // 轮询线程中的Handler
-    private static final int DEFAULT_THREAD_COUNT = 4;  // 默认线程数量
+    private static final int DEFAULT_THREAD_COUNT = 5;  // 默认线程数量
     private Type mType = Type.LIFO;                 // 队列的调度方式，默认为LIFO
 
     private volatile Semaphore mPollingSemaphore;   // 信号量，由于线程池内部也有一个阻塞线程，若加入任务的速度过快，LIFO效果不明显

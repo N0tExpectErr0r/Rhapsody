@@ -28,8 +28,7 @@ public class BitmapUtil {
     public static Bitmap getBitmapFromUri(Context context, Uri uri) {
         try {
             // 读取uri所在的图片
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
-            return bitmap;
+            return MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
         } catch (Exception e) {
             Log.e("[Android]", e.getMessage());
             Log.e("[Android]", "目录为：" + uri);
@@ -44,7 +43,7 @@ public class BitmapUtil {
      * @param imagePath 图片路径
      * @return 得到的bitmap
      */
-    public static Bitmap getBitmapFromPath(String imagePath, int width, int height) {
+    static Bitmap getBitmapFromPath(String imagePath, int width, int height) {
         Bitmap bitmap = null;
         BitmapFactory.Options options = new Options();
         options.inJustDecodeBounds = true;
@@ -55,7 +54,7 @@ public class BitmapUtil {
         }else if (width == 0 && height!=0){
             // 以高度为衡量标准缩放为正方形
             options.inSampleSize = calculateInSampleSize(options,height,height);
-        }else if (height == 0 && width!=0){
+        }else if (width != 0){
             // 以宽度为衡量标准缩放为正方形
             options.inSampleSize = calculateInSampleSize(options,width,width);
         }
@@ -72,7 +71,7 @@ public class BitmapUtil {
      * @param reqHeight 需要的高
      * @return 计算结果
      */
-    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+    private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
         // 原始图片的宽高
         final int height = options.outHeight;
         final int width = options.outWidth;
@@ -114,8 +113,7 @@ public class BitmapUtil {
         }
         ByteArrayInputStream isBm = new ByteArrayInputStream(baos.toByteArray());
         // 生成Bitmap
-        Bitmap bitmap = BitmapFactory.decodeStream(isBm, null, null);
-        return bitmap;
+        return BitmapFactory.decodeStream(isBm, null, null);
     }
 
     /**
@@ -138,8 +136,7 @@ public class BitmapUtil {
         Matrix matrix = new Matrix();
         matrix.postScale(scaleWidth, scaleHeight);
         // 得到新的图片
-        Bitmap outBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-        return outBitmap;
+        return Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
     }
 
 }

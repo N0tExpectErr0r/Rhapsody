@@ -52,7 +52,7 @@ public class ImageTaskCreator {
         mTargetWidth = 0;
         mTargetHeight = 0;
 
-        int memory = (int) (Runtime.getRuntime().maxMemory() / 4);   // 取1/4内存存储图片
+        int memory = (int) (Runtime.getRuntime().maxMemory() / 8);   // 取1/8内存存储图片
 
         if (sImageCache == null) {
             sImageCache = new LruCache<String, Bitmap>(memory) {
@@ -104,7 +104,7 @@ public class ImageTaskCreator {
                 ImageHolder imageHolder = new ImageHolder(localBitmap, imageView, path);
                 Message message = Message.obtain();
                 message.obj = imageHolder;
-                //回到主线程更新ui
+                //回到主线程更新UI
                 mUIHandler.sendMessage(message);
             }
         };
