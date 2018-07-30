@@ -3,14 +3,14 @@ package com.n0texpecterr0r.rhapsody.model;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.MediaStore.Images.Media;
-import com.n0texpecterr0r.rhapsody.ImageNameFilter;
 import com.n0texpecterr0r.rhapsody.SelectConfig;
-import com.n0texpecterr0r.rhapsody.view.SelectView;
 import com.n0texpecterr0r.rhapsody.bean.Floder;
+import com.n0texpecterr0r.rhapsody.bean.ImageType;
 import com.n0texpecterr0r.rhapsody.dao.GalleryDao;
+import com.n0texpecterr0r.rhapsody.view.SelectView;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -50,7 +50,9 @@ public class SelectModel {
                     File parentFile = new File(path).getParentFile();
 
                     // 获取父文件夹
-                    if (parentFile == null)     continue;
+                    if (parentFile == null) {
+                        continue;
+                    }
                     String dirPath = parentFile.getAbsolutePath();
                     Floder floder = null;
 
@@ -84,31 +86,83 @@ public class SelectModel {
     }
 
     /**
-     * 获取指定文件夹的图片路径列表
+     * 异步获取指定文件夹的图片路径列表
+     *
      * @param floder 指定文件夹
-     * @return 文件夹中包含的图片的路径集合
      */
-    public List<String> getImageFromFloder(Floder floder){
+    public void getImageFromFloderSync(final Floder floder) {
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                File floderFile = new File(floder.getDir());
+                String[] imageNames = floderFile.list(new ImageNameFilter(mConfig.imageTypes));
+                List<String> paths = new ArrayList<>();
+                for (String imageName : imageNames) {
+                    paths.add(floder.getDir() + "/" + imageName);
+                }
+                mSelectView.onImages(paths);
+            }
+        });
+    }
+
+    /**
+     * 同步获取指定文件夹的图片路径列表
+     *
+     * @param floder 指定文件夹
+     * @return 该文件夹包含所有图片路径
+     */
+    public List<String> getImageFromFloder(final Floder floder) {
+
         File floderFile = new File(floder.getDir());
         String[] imageNames = floderFile.list(new ImageNameFilter(mConfig.imageTypes));
         List<String> paths = new ArrayList<>();
         for (String imageName : imageNames) {
-            paths.add(floder.getDir()+"/"+imageName);
+            paths.add(floder.getDir() + "/" + imageName);
         }
         return paths;
     }
 
     /**
      * 获取文件夹列表中所有图片的路径列表
+     *
      * @param floders 文件夹的集合
-     * @return 所有文件夹中包含的所有图片的名路径
      */
-    public List<String> getImageFromFloderList(List<Floder> floders){
-        List<String> paths = new ArrayList<>();
-        for (Floder floder : floders) {
-            List<String> tempList = getImageFromFloder(floder);
-            paths.addAll(tempList);
+    public void getImageFromFloderList(final List<Floder> floders) {
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                List<String> paths = new ArrayList<>();
+                for (Floder floder : floders) {
+                    List<String> tempList = getImageFromFloder(floder);
+                    paths.addAll(tempList);
+                }
+                mSelectView.onImages(paths);
+            }
+        });
+    }
+
+    /**
+     * 图片名称过滤器
+     */
+    class ImageNameFilter implements FilenameFilter {
+        private Set<ImageType> mImageTypes;
+
+        public ImageNameFilter(Set<ImageType> imageTypes){
+            mImageTypes = imageTypes;
         }
-        return paths;
+
+        @Override
+        public boolean accept(File dir, String name) {
+            // 遍历所有选择的后缀名
+            for (ImageType imageType : mImageTypes) {
+                for (String extension : imageType.getExtensions()) {
+                    if (name.endsWith(extension)) {
+                        //如果是以该后缀名结尾，返回true
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 }

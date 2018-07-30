@@ -19,7 +19,6 @@ import com.n0texpecterr0r.rhapsody.R;
 import com.n0texpecterr0r.rhapsody.SelectConfig;
 import com.n0texpecterr0r.rhapsody.adapter.ImageAdapter.ImageViewHolder;
 import com.n0texpecterr0r.rhapsody.engine.ImageEngine;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -66,6 +65,12 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> implemen
             mCheckStatus.put(i, false);
         }
         mCheckCount = 0;
+        // 更新UI
+        Intent intent = new Intent();
+        intent.setAction("select_image");
+        intent.putExtra("type","select_change");
+        intent.putExtra("select_num",mCheckCount);
+        mContext.sendBroadcast(intent);
     }
 
     @NonNull
@@ -115,12 +120,8 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> implemen
                             Toast.LENGTH_SHORT).show();
                 }
 
-                // 发送选中数量的广播
-                Intent intent = new Intent();
-                intent.setAction("select_image");
-                intent.putExtra("type","select_change");
-                intent.putExtra("select_num",mCheckCount);
-                mContext.sendBroadcast(intent);
+                // 发送选中数量的广播更新ui
+                sendBroadcastUpdateUI();
             }
         });
 
@@ -130,6 +131,14 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> implemen
         } else {
             imageView.setColorFilter(null);
         }
+    }
+
+    private void sendBroadcastUpdateUI() {
+        Intent intent = new Intent();
+        intent.setAction("select_image");
+        intent.putExtra("type", "select_change");
+        intent.putExtra("select_num", mCheckCount);
+        mContext.sendBroadcast(intent);
     }
 
     @Override

@@ -12,7 +12,13 @@ public interface SelectView {
 
     /**
      * 接收到文件夹列表的回调
-     * @param floders
+     * @param floders 收到的文件夹列表
      */
     void onFloder(List<Floder> floders);
+
+    /**
+     * 接收到图片地址的回调
+     * @param imagePaths 收到的图片地址列表
+     */
+    void onImages(List<String> imagePaths);
 }
