@@ -10,6 +10,7 @@
         android:padding="10dp">
         <ImageView
             android:id="@+id/floder_iv_cover"
+            android:scaleType="centerCrop"
             android:layout_width="72dp"
             android:layout_height="72dp"/>
         <TextView

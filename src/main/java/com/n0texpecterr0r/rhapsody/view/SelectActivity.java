@@ -22,14 +22,16 @@ import android.view.WindowManager;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import com.n0texpecterr0r.rhapsody.Constants;
 import com.n0texpecterr0r.rhapsody.R;
 import com.n0texpecterr0r.rhapsody.SelectConfig;
-import com.n0texpecterr0r.rhapsody.adapter.ImageAdapter;
+import com.n0texpecterr0r.rhapsody.adapter.GalleryAdapter;
 import com.n0texpecterr0r.rhapsody.adapter.base.BaseAdapter.OnItemClickListener;
 import com.n0texpecterr0r.rhapsody.bean.Floder;
 import com.n0texpecterr0r.rhapsody.model.SelectModel;
 import com.n0texpecterr0r.rhapsody.permission.PermissionActivity;
 import com.n0texpecterr0r.rhapsody.permission.PermissionChecker;
+import com.n0texpecterr0r.rhapsody.view.base.BaseActivity;
 import com.n0texpecterr0r.rhapsody.view.ui.FloderPopWindow;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,7 +42,7 @@ import java.util.List;
  * @date 2018/7/25 10:07
  * @describe 选择图片界面
  */
-public class SelectActivity extends AppCompatActivity implements SelectView {
+public class SelectActivity extends BaseActivity implements SelectView {
 
     private static final int REQUEST_PERMISSION_CODE = 0;  // 请求权限Code
     private List<String> mAllImages;        // 所有图片的List
@@ -48,14 +50,16 @@ public class SelectActivity extends AppCompatActivity implements SelectView {
     private ProgressBar mPbLoading;         // 加载进度View
     private SelectModel mModel;             // 加载数据Model层
     private RecyclerView mRvGallery;        // Gallery展示View
-    private ImageAdapter mAdapter;          // GalleryAdapter
+    private GalleryAdapter mAdapter;        // GalleryAdapter
     private MenuItem mItemConfirm;          // 右上角确定按钮
+    private TextView mTvPreview;            // 右下角预览按钮
     private TextView mTvFloderName;         // 左下角文件夹名
     private FloderPopWindow mFloderWindow;  // 弹出文件夹菜单
     private Handler mUIHandler;             // 主线程调度Handler
 
 
-    private BroadcastReceiver mBroadcastReceiver;
+    private BroadcastReceiver mAdapterReceiver; // Adapter发来的广播接收器
+    private BroadcastReceiver mPreviewReceiver; // Preview发来的广播接收器
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -66,14 +70,18 @@ public class SelectActivity extends AppCompatActivity implements SelectView {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void initVariables() {
+        registerBroadcast();
+    }
+
+    @Override
+    protected void initViews(Bundle savedInstanceState) {
         setContentView(R.layout.activity_select);
 
         // 初始化RecyclerView
         mRvGallery = findViewById(R.id.select_rv_gallery);
         mRvGallery.setLayoutManager(new GridLayoutManager(this, 4));
-        mAdapter = new ImageAdapter(new ArrayList<String>(), this);
+        mAdapter = new GalleryAdapter(new ArrayList<String>(), this);
         mRvGallery.setAdapter(mAdapter);
         // 初始化Toolbar
         Toolbar toolbar = findViewById(R.id.select_toolbar);
@@ -92,6 +100,16 @@ public class SelectActivity extends AppCompatActivity implements SelectView {
             }
         });
 
+        // 初始化预览TextView
+        mTvPreview = findViewById(R.id.select_tv_preview);
+        mTvPreview.setVisibility(View.GONE);
+        mTvPreview.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PreviewActivity.actionStart(SelectActivity.this,mAdapter.getCheckedImages());
+            }
+        });
+
         // 准备数据加载
         mPbLoading = findViewById(R.id.select_pb_loading);
         mModel = new SelectModel(getContentResolver(), this);
@@ -105,8 +123,37 @@ public class SelectActivity extends AppCompatActivity implements SelectView {
             mModel.getFloderList();
         }
 
-        // UI线程调度Handler
+        // 初始化UI线程调度Handler
         mUIHandler = new Handler(Looper.getMainLooper());
+    }
+
+    @Override
+    protected void loadData() {
+
+    }
+
+    /**
+     * 注册广播
+     */
+    private void registerBroadcast() {
+        //注册广播
+        mAdapterReceiver = new AdapterReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Constants.FRESH_SELECT);
+        registerReceiver(mAdapterReceiver, intentFilter);
+
+        mPreviewReceiver = new PreViewReceiver();
+        IntentFilter intentFilter1 = new IntentFilter();
+        intentFilter1.addAction(Constants.SELECT_CHANGE);
+        registerReceiver(mPreviewReceiver,intentFilter1);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // 注销广播
+        unregisterReceiver(mAdapterReceiver);
+        unregisterReceiver(mPreviewReceiver);
     }
 
     @Override
@@ -125,24 +172,6 @@ public class SelectActivity extends AppCompatActivity implements SelectView {
                 break;
         }
 
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mBroadcastReceiver = new GalleryReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        // 设置接收广播的类型
-        intentFilter.addAction("select_image");
-        // 注册广播
-        registerReceiver(mBroadcastReceiver, intentFilter);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        // 注销广播
-        unregisterReceiver(mBroadcastReceiver);
     }
 
     @Override
@@ -177,7 +206,7 @@ public class SelectActivity extends AppCompatActivity implements SelectView {
                         if (position == 0) {
                             // 如果是全部图片
                             mAdapter.setPaths(mAllImages);
-                        }else {
+                        } else {
                             // 将对应文件夹所有图片应用于图库
                             mModel.getImageFromFloderSync(mFloders.get(position));
                         }
@@ -216,6 +245,11 @@ public class SelectActivity extends AppCompatActivity implements SelectView {
         });
     }
 
+    /**
+     * 获取到全部图片列表的回调
+     *
+     * @param imagePaths 图片路径列表
+     */
     @Override
     public void onAllImages(final List<String> imagePaths) {
         Collections.reverse(imagePaths);
@@ -230,23 +264,47 @@ public class SelectActivity extends AppCompatActivity implements SelectView {
     }
 
     /**
-     * 广播接收器，监听选择改变广播并更新UI
+     * 广播接收器，接收Adapter发来的广播
      */
-    class GalleryReceiver extends BroadcastReceiver {
+    class AdapterReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getStringExtra("type")) {
-                case "select_change":
-                    int selectNum = intent.getIntExtra("select_num", 0);
-                    if (selectNum == 0) {
-                        mItemConfirm.setVisible(false);
-                    } else {
-                        mItemConfirm.setVisible(true);
-                        mItemConfirm.setTitle("确定(" + selectNum + "/" +
-                                SelectConfig.getInstance().maxSelectCount + ")");
-                    }
-                    break;
+            int selectNum = intent.getIntExtra("select_num", 0);
+            if (selectNum == 0) {
+                mItemConfirm.setVisible(false);
+                mTvPreview.setVisibility(View.GONE);
+            } else {
+                mItemConfirm.setVisible(true);
+                mItemConfirm.setTitle("确定(" + selectNum + "/" +
+                        SelectConfig.getInstance().maxSelectCount + ")");
+                mTvPreview.setVisibility(View.VISIBLE);
+                mTvPreview.setText("预览("+selectNum+")");
+            }
+        }
+    }
+
+    /**
+     * 广播接收器，接收预览界面发来的广播
+     */
+    class PreViewReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            List<String> selectPaths = intent.getStringArrayListExtra("select_paths");
+            mAdapter.changeSelect(selectPaths);
+
+            // 更新UI
+            int selectNum = selectPaths.size();
+            if (selectNum == 0) {
+                mItemConfirm.setVisible(false);
+                mTvPreview.setVisibility(View.GONE);
+            } else {
+                mItemConfirm.setVisible(true);
+                mItemConfirm.setTitle("确定(" + selectNum + "/" +
+                        SelectConfig.getInstance().maxSelectCount + ")");
+                mTvPreview.setVisibility(View.VISIBLE);
+                mTvPreview.setText("预览("+selectNum+")");
             }
         }
     }

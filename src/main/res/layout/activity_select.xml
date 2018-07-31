@@ -1,47 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <LinearLayout
+    android:layout_height="match_parent"
+    android:background="#333333"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/select_toolbar"
         android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:title="选择图片"/>
+    <ProgressBar
+        android:id="@+id/select_pb_loading"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:background="#333333"
-        android:orientation="vertical">
+        android:layout_gravity="center"/>
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/select_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:title="选择图片"/>
-        <ProgressBar
-            android:id="@+id/select_pb_loading"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"/>
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/select_rv_gallery"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-    </LinearLayout>
-    <LinearLayout
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/select_rv_gallery"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="#EE212121"
-        android:layout_gravity="bottom">
+        android:layout_gravity="bottom"
+        android:background="#212121"
+        android:orientation="horizontal">
         <TextView
             android:id="@+id/select_tv_floder_name"
             android:layout_width="wrap_content"
-            android:layout_height="56dp"
-            android:gravity="left|center_vertical"
+            android:layout_height="52dp"
             android:padding="16dp"
-            android:textColor="#fff"
             android:drawableRight="@drawable/ic_floder"
-            android:text="所有图片"/>
-    </LinearLayout>
-</FrameLayout>
+            android:gravity="center_vertical"
+            android:layout_alignParentStart="true"
+            android:text="全部图片"
+            android:textColor="#fff"/>
+        <TextView
+            android:id="@+id/select_tv_preview"
+            android:layout_width="wrap_content"
+            android:layout_height="52dp"
+            android:padding="16dp"
+            android:gravity="center_vertical"
+            android:layout_alignParentEnd="true"
+            android:text="预览"
+            android:textColor="#fff"/>
+    </RelativeLayout>
+</LinearLayout>

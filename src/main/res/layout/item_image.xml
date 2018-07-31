@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.n0texpecterr0r.rhapsody.view.ui.SquareLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="72dp"
+    android:layout_height="72dp"
+    android:padding="8dp"
+    android:background="#212121">
+    <ImageView
+        android:id="@+id/preview_item_iv_image"
+        android:scaleType="centerCrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/mock"/>
+</com.n0texpecterr0r.rhapsody.view.ui.SquareLayout>
