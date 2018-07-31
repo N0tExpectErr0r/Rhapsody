@@ -21,6 +21,7 @@ public class ImageTaskCreator {
     private int mTargetHeight;              // 目标图片高度
     private Handler mUIHandler;             // 主线程Handler，用于回调
     private TaskDispatcher mDispatcher;     // 线程调度器，分发任务。
+    private boolean isUseCache;               // 是否复用缓存
     private volatile static LruCache<String, Bitmap> sImageCache;     //图片缓存容器
 
     /**
@@ -52,6 +53,8 @@ public class ImageTaskCreator {
         mTargetWidth = 0;
         mTargetHeight = 0;
 
+        isUseCache = true;
+
         int memory = (int) (Runtime.getRuntime().maxMemory() / 8);   // 取1/8内存存储图片
 
         if (sImageCache == null) {
@@ -77,21 +80,36 @@ public class ImageTaskCreator {
         return this;
     }
 
+
+    /**
+     * 设置是否复用缓存
+     * @param useCache 是否复用缓存
+     */
+    public ImageTaskCreator useCache(boolean useCache){
+        this.isUseCache = useCache;
+        return this;
+    }
+
     /**
      * 加载图片,执行图片任务的分发
      *
      * @param imageView 目标ImageView
      */
     public void into(final ImageView imageView) {
+
         // 目标ImageView
         imageView.setTag(mPath);
-        // 1.先查看内存缓存
-        Bitmap bitmap = getBitmapFromMemoryCache(mPath);
         final String path = mPath;
-        if (bitmap != null) {
-            // 找到图片
-            imageView.setImageBitmap(bitmap);
-            return;
+
+        if (isUseCache) {
+            // 如果要复用缓存
+            // 1.先查看内存缓存
+            Bitmap bitmap = getBitmapFromMemoryCache(mPath);
+            if (bitmap != null) {
+                // 找到图片
+                imageView.setImageBitmap(bitmap);
+                return;
+            }
         }
 
         // 2.内存没有缓存，获取本地资源

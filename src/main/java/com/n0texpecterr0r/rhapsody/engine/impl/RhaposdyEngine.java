@@ -19,6 +19,6 @@ public class RhaposdyEngine implements ImageEngine {
 
     @Override
     public void loadImage(Context context, int width, int height, ImageView imageView, String path) {
-        RhapsodyLoader.get().load(path).setSize(width,height).into(imageView);
+        RhapsodyLoader.get().load(path).setSize(width,height).useCache(false).into(imageView);
     }
 }

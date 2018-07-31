@@ -20,6 +20,7 @@ import com.n0texpecterr0r.rhapsody.R;
 import com.n0texpecterr0r.rhapsody.SelectConfig;
 import com.n0texpecterr0r.rhapsody.adapter.ImageAdapter.ImageViewHolder;
 import com.n0texpecterr0r.rhapsody.engine.ImageEngine;
+import com.n0texpecterr0r.rhapsody.view.PreviewActivity;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -140,6 +141,9 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> implemen
     public void onClick(View v) {
         // 图片部分的点击事件
         int position = (int) v.getTag();
+        Intent intent = new Intent(mContext,PreviewActivity.class);
+        intent.putExtra("path",mPaths.get(position));
+        mContext.startActivity(intent);
     }
 
     /**
