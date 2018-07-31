@@ -15,10 +15,11 @@ import com.n0texpecterr0r.rhapsody.Constants;
 import com.n0texpecterr0r.rhapsody.R;
 import com.n0texpecterr0r.rhapsody.adapter.ImageAdapter;
 import com.n0texpecterr0r.rhapsody.adapter.ScaleImageAdapter;
+import com.n0texpecterr0r.rhapsody.adapter.base.BaseAdapter.OnItemClickListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PreviewActivity extends AppCompatActivity implements CheckBox.OnClickListener,
+public class PreviewActivity extends AppCompatActivity implements CheckBox.OnClickListener,OnItemClickListener,
         ViewPager.OnPageChangeListener {
 
     private ArrayList<String> mPaths;            // 传入的地址List
@@ -52,6 +53,7 @@ public class PreviewActivity extends AppCompatActivity implements CheckBox.OnCli
         mRvImageList.setLayoutManager(new LinearLayoutManager(this,
                 LinearLayoutManager.HORIZONTAL, false));
         mRvImageList.setAdapter(mImageAdapter);
+        mImageAdapter.setOnItemClickListener(this);
 
         // 初始化ViewPager
         mVpImageArea = findViewById(R.id.preview_vp_image_area);
@@ -94,8 +96,10 @@ public class PreviewActivity extends AppCompatActivity implements CheckBox.OnCli
     public void onClick(View v) {
         if (checkChecked(currentIndex)) {
             mCheckedPaths.remove(mPaths.get(currentIndex));
+            mImageAdapter.addDeleteIndex(currentIndex);
         }else{
             mCheckedPaths.add(mPaths.get(currentIndex));
+            mImageAdapter.removeDeleteIndex(currentIndex);
         }
     }
 
@@ -119,4 +123,10 @@ public class PreviewActivity extends AppCompatActivity implements CheckBox.OnCli
     @Override
     public void onPageScrollStateChanged(int state) {}
 
+    // 底部RecyclerView的item点击事件
+    @Override
+    public void onItemClick(View view, int position) {
+        setCurrent(position);
+        mVpImageArea.setCurrentItem(position);
+    }
 }

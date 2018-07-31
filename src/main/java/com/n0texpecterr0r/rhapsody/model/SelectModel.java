@@ -86,14 +86,15 @@ public class SelectModel {
                     floder.setPictureCount(picCount);
                     floders.add(floder);
                 }
-                // 新建全部图片文件夹
-                Floder mainFloder = new Floder();
-                mainFloder.setDir("/全部图片");
-                mainFloder.setPictureCount(picsCount);
-                mainFloder.setCoverPath(floders.get(0).getCoverPath());
-                // 插入文件夹到头部
-                floders.addFirst(mainFloder);
-
+                if (floders.size()>0) {
+                    // 新建全部图片文件夹
+                    Floder mainFloder = new Floder();
+                    mainFloder.setDir("/全部图片");
+                    mainFloder.setPictureCount(picsCount);
+                    mainFloder.setCoverPath(floders.get(0).getCoverPath());
+                    // 插入文件夹到头部
+                    floders.addFirst(mainFloder);
+                }
                 cursor.close(); // 关闭cursor
                 mSelectView.onFloder(floders);
             }
