@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -70,6 +71,25 @@ public class SelectActivity extends BaseActivity implements SelectView {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.confirm){
+            // 按下确认
+            confirmSelect();
+        }else if (item.getItemId() == android.R.id.home){
+            // 按下返回
+            finish();
+        }
+        return true;
+    }
+
+    private void confirmSelect() {
+        Intent data = new Intent();
+        data.putStringArrayListExtra("result_paths",mAdapter.getCheckedImages());
+        setResult(RESULT_OK,data);
+        finish();
+    }
+
+    @Override
     protected void initVariables() {
         registerBroadcast();
     }
@@ -86,6 +106,10 @@ public class SelectActivity extends BaseActivity implements SelectView {
         // 初始化Toolbar
         Toolbar toolbar = findViewById(R.id.select_toolbar);
         setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        assert actionBar!=null;
+        actionBar.setDisplayHomeAsUpEnabled(true);
+
 
         // 初始化选择文件夹列表
         mTvFloderName = findViewById(R.id.select_tv_floder_name);
@@ -172,14 +196,6 @@ public class SelectActivity extends BaseActivity implements SelectView {
                 break;
         }
 
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        // 如果被意外销毁，重新加载数据
-        mAdapter.setPaths(new ArrayList<String>());
-        mModel.getFloderList();
     }
 
     /**
