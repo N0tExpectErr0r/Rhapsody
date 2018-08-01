@@ -1,6 +1,8 @@
 package com.n0texpecterr0r.rhapsody.view;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static com.n0texpecterr0r.rhapsody.Constants.REQUEST_PERMISSION_CODE;
+import static com.n0texpecterr0r.rhapsody.Constants.REQUEST_PREVIEW_CODE;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,11 +12,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,7 +45,6 @@ import java.util.List;
  */
 public class SelectActivity extends BaseActivity implements SelectView {
 
-    private static final int REQUEST_PERMISSION_CODE = 0;  // 请求权限Code
     private List<String> mAllImages;        // 所有图片的List
     private List<Floder> mFloders;          // Floder列表
     private ProgressBar mPbLoading;         // 加载进度View
@@ -72,10 +71,10 @@ public class SelectActivity extends BaseActivity implements SelectView {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.confirm){
+        if (item.getItemId() == R.id.confirm) {
             // 按下确认
             confirmSelect();
-        }else if (item.getItemId() == android.R.id.home){
+        } else if (item.getItemId() == android.R.id.home) {
             // 按下返回
             finish();
         }
@@ -84,8 +83,8 @@ public class SelectActivity extends BaseActivity implements SelectView {
 
     private void confirmSelect() {
         Intent data = new Intent();
-        data.putStringArrayListExtra("result_paths",mAdapter.getCheckedImages());
-        setResult(RESULT_OK,data);
+        data.putStringArrayListExtra("result_paths", mAdapter.getCheckedImages());
+        setResult(RESULT_OK, data);
         finish();
     }
 
@@ -107,9 +106,8 @@ public class SelectActivity extends BaseActivity implements SelectView {
         Toolbar toolbar = findViewById(R.id.select_toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
-        assert actionBar!=null;
+        assert actionBar != null;
         actionBar.setDisplayHomeAsUpEnabled(true);
-
 
         // 初始化选择文件夹列表
         mTvFloderName = findViewById(R.id.select_tv_floder_name);
@@ -130,7 +128,7 @@ public class SelectActivity extends BaseActivity implements SelectView {
         mTvPreview.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                PreviewActivity.actionStart(SelectActivity.this,mAdapter.getCheckedImages());
+                PreviewActivity.actionStart(SelectActivity.this, mAdapter.getCheckedImages());
             }
         });
 
@@ -169,7 +167,7 @@ public class SelectActivity extends BaseActivity implements SelectView {
         mPreviewReceiver = new PreViewReceiver();
         IntentFilter intentFilter1 = new IntentFilter();
         intentFilter1.addAction(Constants.SELECT_CHANGE);
-        registerReceiver(mPreviewReceiver,intentFilter1);
+        registerReceiver(mPreviewReceiver, intentFilter1);
     }
 
     @Override
@@ -192,6 +190,12 @@ public class SelectActivity extends BaseActivity implements SelectView {
                 } else {
                     // 接收了，加载数据
                     mModel.getFloderList();
+                }
+                break;
+            case REQUEST_PREVIEW_CODE:
+                if (resultCode == RESULT_OK) {
+                    // 预览返回结果(预览中按下确认)
+                    confirmSelect();
                 }
                 break;
         }
@@ -295,7 +299,7 @@ public class SelectActivity extends BaseActivity implements SelectView {
                 mItemConfirm.setTitle("确定(" + selectNum + "/" +
                         SelectConfig.getInstance().maxSelectCount + ")");
                 mTvPreview.setVisibility(View.VISIBLE);
-                mTvPreview.setText("预览("+selectNum+")");
+                mTvPreview.setText("预览(" + selectNum + ")");
             }
         }
     }
@@ -303,7 +307,7 @@ public class SelectActivity extends BaseActivity implements SelectView {
     /**
      * 广播接收器，接收预览界面发来的广播
      */
-    class PreViewReceiver extends BroadcastReceiver{
+    class PreViewReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -320,7 +324,7 @@ public class SelectActivity extends BaseActivity implements SelectView {
                 mItemConfirm.setTitle("确定(" + selectNum + "/" +
                         SelectConfig.getInstance().maxSelectCount + ")");
                 mTvPreview.setVisibility(View.VISIBLE);
-                mTvPreview.setText("预览("+selectNum+")");
+                mTvPreview.setText("预览(" + selectNum + ")");
             }
         }
     }

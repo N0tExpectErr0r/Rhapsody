@@ -1,16 +1,22 @@
 package com.n0texpecterr0r.rhapsody.view;
 
-import android.content.Context;
+import static com.n0texpecterr0r.rhapsody.Constants.REQUEST_PREVIEW_CODE;
+
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import com.n0texpecterr0r.rhapsody.Constants;
 import com.n0texpecterr0r.rhapsody.R;
+import com.n0texpecterr0r.rhapsody.SelectConfig;
 import com.n0texpecterr0r.rhapsody.adapter.ImageAdapter;
 import com.n0texpecterr0r.rhapsody.adapter.ScaleImageAdapter;
 import com.n0texpecterr0r.rhapsody.adapter.base.BaseAdapter.OnItemClickListener;
@@ -26,14 +32,15 @@ public class PreviewActivity extends BaseActivity implements CheckBox.OnClickLis
     private ViewPager mVpImageArea;                 // 显示图片的ViewPager
     private RecyclerView mRvImageList;              // 显示图片列表的RecyclerView
     private Toolbar mToolbar;                       // ToolBar
+    private MenuItem mItemConfirm;                  // 确认item
     private CheckBox mCbSelect;                     // 显示当前是否被选中的CheckBox
     private ImageAdapter mImageAdapter;             // RecyclerView的Adapter
     private ScaleImageAdapter mScaleImageAdapter;   // ViewPager的Adapter
 
-    public static void actionStart(Context context, ArrayList<String> paths) {
+    public static void actionStart(Activity context, ArrayList<String> paths) {
         Intent intent = new Intent(context, PreviewActivity.class);
         intent.putStringArrayListExtra("paths", paths);
-        context.startActivity(intent);
+        context.startActivityForResult(intent, REQUEST_PREVIEW_CODE);
     }
 
     @Override
@@ -42,6 +49,33 @@ public class PreviewActivity extends BaseActivity implements CheckBox.OnClickLis
         Intent intent = getIntent();
         mPaths = intent.getStringArrayListExtra("paths");
         mCheckedPaths = new ArrayList<>(mPaths);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_select, menu);
+        mItemConfirm = menu.findItem(R.id.confirm);
+        mItemConfirm.setTitle("确定(" + mCheckedPaths.size() + "/" +
+                SelectConfig.getInstance().maxSelectCount + ")");
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+        } else if (item.getItemId() == R.id.confirm) {
+            confirmSelect();
+        }
+        return true;
+    }
+
+    /**
+     * 确认选择，返回数据
+     */
+    private void confirmSelect() {
+        setResult(RESULT_OK);
+        finish();
     }
 
     @Override
@@ -66,6 +100,9 @@ public class PreviewActivity extends BaseActivity implements CheckBox.OnClickLis
         // 初始化Toolbar
         mToolbar = findViewById(R.id.preview_toolbar);
         setSupportActionBar(mToolbar);
+        ActionBar actionBar = getSupportActionBar();
+        assert actionBar != null;
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
         // 初始化Checkbox
         mCbSelect = findViewById(R.id.preview_cb_select);
@@ -113,6 +150,13 @@ public class PreviewActivity extends BaseActivity implements CheckBox.OnClickLis
         } else {
             mCheckedPaths.add(mPaths.get(currentIndex));
             mImageAdapter.removeDeleteIndex(currentIndex);
+        }
+        if (mCheckedPaths.size()>0){
+            mItemConfirm.setVisible(true);
+            mItemConfirm.setTitle("确定(" + mCheckedPaths.size() + "/" +
+                    SelectConfig.getInstance().maxSelectCount + ")");
+        }else{
+            mItemConfirm.setVisible(false);
         }
     }
 

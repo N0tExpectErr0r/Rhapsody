@@ -1,14 +1,20 @@
 package com.n0texpecterr0r.rhapsody.view;
 
+import static com.n0texpecterr0r.rhapsody.Constants.REQUEST_PREVIEW_CODE;
+
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.Toast;
@@ -40,14 +46,15 @@ public class ImageDetailActivity extends BaseActivity implements OnItemClickList
     private CheckBox mCbSelect;                     // 显示当前是否被选中的CheckBox
     private ImageAdapter mImageAdapter;             // RecyclerView的Adapter
     private ScaleImageAdapter mScaleImageAdapter;   // ViewPager的Adapter
+    private MenuItem mItemConfirm;                  // 确认选择Item
 
-    public static void actionStart(Context context, int currentIndex, ArrayList<String> paths,
+    public static void actionStart(Activity context, int currentIndex, ArrayList<String> paths,
             ArrayList<String> checkedPaths) {
         Intent intent = new Intent(context, ImageDetailActivity.class);
         intent.putExtra("index", currentIndex);
         intent.putStringArrayListExtra("paths", paths);
         intent.putStringArrayListExtra("checked_paths", checkedPaths);
-        context.startActivity(intent);
+        context.startActivityForResult(intent,REQUEST_PREVIEW_CODE);
     }
 
     @Override
@@ -57,7 +64,6 @@ public class ImageDetailActivity extends BaseActivity implements OnItemClickList
         mPaths = intent.getStringArrayListExtra("paths");
         mCheckedPaths = intent.getStringArrayListExtra("checked_paths");
         mCurrentIndex = intent.getIntExtra("index", 0);
-        Log.d("initVariables", mCurrentIndex + "");
     }
 
     @Override
@@ -82,6 +88,9 @@ public class ImageDetailActivity extends BaseActivity implements OnItemClickList
         // 初始化Toolbar
         mToolbar = findViewById(R.id.preview_toolbar);
         setSupportActionBar(mToolbar);
+        ActionBar actionBar = getSupportActionBar();
+        assert actionBar != null;
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
         // 初始化Checkbox
         mCbSelect = findViewById(R.id.preview_cb_select);
@@ -98,6 +107,39 @@ public class ImageDetailActivity extends BaseActivity implements OnItemClickList
         super.onResume();
         setCurrent(mCurrentIndex);
         mVpImageArea.setCurrentItem(mCurrentIndex);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_select, menu);
+        mItemConfirm = menu.findItem(R.id.confirm);
+        if (mCheckedPaths.size()>0) {
+            // 如果已经有选择
+            mItemConfirm.setTitle("确定(" + mCheckedPaths.size() + "/" +
+                    SelectConfig.getInstance().maxSelectCount + ")");
+        }else{
+            // 如果没有选择
+            mItemConfirm.setVisible(false);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+        } else if (item.getItemId() == R.id.confirm) {
+            confirmSelect();
+        }
+        return true;
+    }
+
+    /**
+     * 确认选择，返回数据
+     */
+    private void confirmSelect() {
+        setResult(RESULT_OK);
+        finish();
     }
 
     /**
@@ -139,6 +181,13 @@ public class ImageDetailActivity extends BaseActivity implements OnItemClickList
                 mCbSelect.setChecked(false);
                 ToastUtil.show(this, "最多只能选择" + maxCount + "张图片");
             }
+        }
+        if (mCheckedPaths.size()>0){
+            mItemConfirm.setVisible(true);
+            mItemConfirm.setTitle("确定(" + mCheckedPaths.size() + "/" +
+                    SelectConfig.getInstance().maxSelectCount + ")");
+        }else{
+            mItemConfirm.setVisible(false);
         }
     }
 

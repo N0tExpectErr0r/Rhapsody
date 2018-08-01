@@ -2,6 +2,7 @@ package com.n0texpecterr0r.rhapsody.adapter;
 
 import static android.graphics.Color.argb;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -35,10 +36,10 @@ public class GalleryAdapter extends RecyclerView.Adapter<ImageViewHolder> implem
     private ImageEngine mImageEngine;           // 加载图片的引擎
     private List<String> mCheckedImages;        // 存储勾选框状态的map集合
     private int mMaxCheckCount;                 // 最大选择个数
-    private Context mContext;                   // 上下文
+    private Activity mContext;                  // 上下文
     private float mScaleValue;                  // 缩略图缩放比例
 
-    public GalleryAdapter(List<String> paths, Context context) {
+    public GalleryAdapter(List<String> paths, Activity context) {
         mPaths = paths;
         mImageEngine = SelectConfig.getInstance().mEngine;
         mScaleValue = SelectConfig.getInstance().thumbnailScale;
