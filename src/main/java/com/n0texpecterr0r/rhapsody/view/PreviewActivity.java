@@ -69,7 +69,11 @@ public class PreviewActivity extends AppCompatActivity implements CheckBox.OnCli
         // 初始化Checkbox
         mCbSelect = findViewById(R.id.preview_cb_select);
         mCbSelect.setOnClickListener(this);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
         setCurrent(0);
     }
 
@@ -81,6 +85,7 @@ public class PreviewActivity extends AppCompatActivity implements CheckBox.OnCli
         currentIndex = index;
         mToolbar.setTitle((currentIndex+1) + "/" + mPaths.size());
         mCbSelect.setChecked(checkChecked(index));
+        mImageAdapter.setCurrentIndex(currentIndex);
     }
 
     /**

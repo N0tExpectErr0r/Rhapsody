@@ -78,13 +78,13 @@ public final class SelectCreator {
         Activity activity = mSelector.getActivity();
         if (activity != null) {
             Fragment fragment = mSelector.getFragment();
-            //创建Activity
+            // 创建Activity
             Intent intent = new Intent(activity, SelectActivity.class);
             if (fragment == null) {
-                //如果Fragment为null说明从Acitivty启动
+                // 如果Fragment为null说明从Acitivty启动
                 activity.startActivityForResult(intent, requestCode);
             } else {
-                //如果Fragment不为null，说明从Fragment启动
+                // 如果Fragment不为null，说明从Fragment启动
                 fragment.startActivityForResult(intent, requestCode);
             }
         }

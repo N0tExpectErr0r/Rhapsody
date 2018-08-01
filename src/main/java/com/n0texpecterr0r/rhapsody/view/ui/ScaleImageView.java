@@ -1,6 +1,5 @@
 package com.n0texpecterr0r.rhapsody.view.ui;
 
-import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -43,23 +42,24 @@ public class ScaleImageView extends ImageView implements OnGlobalLayoutListener,
     private GestureDetector mGestureDetector;           // 监听双击
     private Matrix mMatrix;             // 图像变换矩阵
     private int mLastPointerCount;      // 上一次的手势个数
+    private float mLastX;
     private float mLastPointerX;        // 上一次手势中心点X
     private float mLastPointerY;        // 上一次手势中心点Y
     private boolean canMove;            // 能否移动
 
     public ScaleImageView(Context context) {
         super(context);
-        init(context,null);
+        init(context, null);
     }
 
     public ScaleImageView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init(context,attrs);
+        init(context, attrs);
     }
 
     public ScaleImageView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context,attrs);
+        init(context, attrs);
     }
 
     private void init(Context context, AttributeSet attrs) {
@@ -68,8 +68,8 @@ public class ScaleImageView extends ImageView implements OnGlobalLayoutListener,
 
         // 获取自定义属性
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.ScaleImageView);
-        mMaxScaleValue = typedArray.getFloat(R.styleable.ScaleImageView_maxScale,4);
-        mMidScaleValue = typedArray.getFloat(R.styleable.ScaleImageView_midScale,2);
+        mMaxScaleValue = typedArray.getFloat(R.styleable.ScaleImageView_maxScale, 4);
+        mMidScaleValue = typedArray.getFloat(R.styleable.ScaleImageView_midScale, 2);
         typedArray.recycle();   // 回收
 
         mScaleGestureDetector = new ScaleGestureDetector(context, this);
@@ -81,6 +81,7 @@ public class ScaleImageView extends ImageView implements OnGlobalLayoutListener,
 
         // 设置双击的放大缩小事件
         mGestureDetector = new GestureDetector(context, new SimpleOnGestureListener() {
+
             @Override
             public boolean onDoubleTap(MotionEvent event) {
                 if (isScaling) {
@@ -99,7 +100,6 @@ public class ScaleImageView extends ImageView implements OnGlobalLayoutListener,
                     postDelayed(new AutoScaleTask(mOriginScale, x, y), 4);
                     isScaling = true;
                 }
-
                 return true;
             }
         });
@@ -204,17 +204,17 @@ public class ScaleImageView extends ImageView implements OnGlobalLayoutListener,
             float scale = 1.0F; // 缩放比例
 
             // 如果图片比控件宽度小，高度大
-            if (width > drawableWidth && height < drawableHeight) {
-                scale = (float)height / drawableHeight;    // 计算缩放比例
+            if (width >= drawableWidth && height <= drawableHeight) {
+                scale = height * 1.0F / drawableHeight;    // 计算缩放比例
             }
             // 如果图片比控件高度小，宽度大
-            if (width < drawableHeight && height > drawableHeight) {
-                scale = (float)width / drawableWidth;      // 计算缩放比例
+            if (width <= drawableWidth && height >= drawableHeight) {
+                scale = width * 1.0F / drawableWidth;      // 计算缩放比例
             }
 
             // 计算缩放比例
-            if ((width < drawableWidth && height < drawableHeight) ||
-                    (width > drawableWidth && height > drawableHeight)) {
+            if ((width <= drawableWidth && height <= drawableHeight) ||
+                    (width >= drawableWidth && height >= drawableHeight)) {
                 scale = Math.min(width * 1.0F / drawableWidth, height * 1.0F / drawableHeight);
             }
 
@@ -260,6 +260,7 @@ public class ScaleImageView extends ImageView implements OnGlobalLayoutListener,
         }
         // 控制缩放最大最小值
         if ((scale < mMaxScale && scaleFactor > 1.0f) || (scale > mOriginScale && scaleFactor < 1.0f)) {
+
             if (scale * scaleFactor > mMaxScale) {
                 scaleFactor = mMaxScale / scale;
             }
@@ -345,6 +346,36 @@ public class ScaleImageView extends ImageView implements OnGlobalLayoutListener,
     }
 
     @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        RectF rectF = getMatrixRectF();  // 用于获取当前图片大小，计算是否要父容器拦截
+        float x = event.getX();
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                getParent().requestDisallowInterceptTouchEvent(true);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                float deltaX = x - mLastX;
+                if (rectF.width() > getWidth() + 1 || rectF.height() > getHeight() + 1) {
+                    //// 放大情况下
+                    //if (rectF.left == 0 && deltaX > 0) {
+                    //    getParent().requestDisallowInterceptTouchEvent(false);
+                    //} else if (rectF.right == getWidth() && deltaX < 0) {
+                    //    getParent().requestDisallowInterceptTouchEvent(false);
+                    //}
+                    getParent().requestDisallowInterceptTouchEvent(true);
+                } else {
+                    getParent().requestDisallowInterceptTouchEvent(false);
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                break;
+        }
+        mLastX = x;
+        return super.dispatchTouchEvent(event);
+    }
+
+
+    @Override
     public boolean onTouch(View v, MotionEvent event) {
         // 双击放大与缩小事件传递给GestureDetector，防止双击时发生移动的事件响应
         if (mGestureDetector.onTouchEvent(event)) {
@@ -355,10 +386,8 @@ public class ScaleImageView extends ImageView implements OnGlobalLayoutListener,
         mScaleGestureDetector.onTouchEvent(event);
 
         // 上面的都不接收，则为滑动事件
-
         float pointerX = 0;
         float pointerY = 0;
-
         // 计算触控中心点的坐标
         int pointerCount = event.getPointerCount();
         for (int i = 0; i < pointerCount; i++) {
@@ -393,11 +422,11 @@ public class ScaleImageView extends ImageView implements OnGlobalLayoutListener,
                 if (canMove) {
                     RectF rect = getMatrixRectF();  // 获取图片缩放后信息
                     if (getDrawable() != null) {
-                        if (rect.width()<getWidth()) {
+                        if (rect.width() < getWidth()) {
                             // 宽度小于控件宽度，禁止左右移动
                             deltaX = 0;
                         }
-                        if (rect.height()<getHeight()) {
+                        if (rect.height() < getHeight()) {
                             // 宽度小于控件高度，禁止上下移动
                             deltaY = 0;
                         }
