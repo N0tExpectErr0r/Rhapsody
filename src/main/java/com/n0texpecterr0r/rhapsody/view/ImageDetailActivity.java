@@ -14,6 +14,7 @@ import android.widget.CheckBox;
 import android.widget.Toast;
 import com.n0texpecterr0r.rhapsody.Constants;
 import com.n0texpecterr0r.rhapsody.R;
+import com.n0texpecterr0r.rhapsody.SelectConfig;
 import com.n0texpecterr0r.rhapsody.adapter.ImageAdapter;
 import com.n0texpecterr0r.rhapsody.adapter.ScaleImageAdapter;
 import com.n0texpecterr0r.rhapsody.adapter.base.BaseAdapter.OnItemClickListener;
@@ -128,8 +129,16 @@ public class ImageDetailActivity extends BaseActivity implements OnItemClickList
             mCheckedPaths.remove(mPaths.get(mCurrentIndex));
             setCurrent(mCurrentIndex);  // 刷新RecyclerView
         } else {
-            mCheckedPaths.add(mPaths.get(mCurrentIndex));
-            setCurrent(mCurrentIndex);  // 刷新RecyclerView
+            int maxCount = SelectConfig.getInstance().maxSelectCount;
+            if (mCheckedPaths.size()< maxCount) {
+                // 如果没有超过最大个数
+                mCheckedPaths.add(mPaths.get(mCurrentIndex));
+                setCurrent(mCurrentIndex);  // 刷新RecyclerView
+            }else{
+                // 已经超过最大选择个数
+                mCbSelect.setChecked(false);
+                ToastUtil.show(this, "最多只能选择" + maxCount + "张图片");
+            }
         }
     }
 

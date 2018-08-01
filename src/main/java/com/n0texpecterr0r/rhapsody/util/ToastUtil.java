@@ -1,7 +1,10 @@
 package com.n0texpecterr0r.rhapsody.util;
 
+import static android.graphics.Color.argb;
+
 import android.content.Context;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.Toast;
 
 /**
@@ -22,10 +25,9 @@ public class ToastUtil {
         if (sToast == null){
             sToast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
         }else {
-            //如果当前Toast没有消失,直接显示内容
+            // 如果当前Toast没有消失,直接显示内容
             sToast.setText(text);
         }
-        sToast.setGravity(Gravity.CENTER , 0 , 0);
         sToast.show();
     }
 
