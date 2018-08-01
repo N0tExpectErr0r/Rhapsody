@@ -57,7 +57,7 @@ public class ImageAdapter extends BaseAdapter<String> {
         ImageView imageView = ((CommonViewHolder)viewHolder).getView(R.id.preview_item_iv_image);
         View border = ((CommonViewHolder)viewHolder).getView(R.id.preview_item_border);
         if (mDeletedIndexs.contains(position)){
-            imageView.setColorFilter(argb(50, 255, 0, 0));
+            imageView.setColorFilter(argb(175, 0, 0, 0));
         }else{
             imageView.setColorFilter(null);
         }

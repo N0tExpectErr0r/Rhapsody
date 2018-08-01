@@ -4,25 +4,35 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.Toast;
 import com.n0texpecterr0r.rhapsody.Constants;
 import com.n0texpecterr0r.rhapsody.R;
 import com.n0texpecterr0r.rhapsody.adapter.ImageAdapter;
 import com.n0texpecterr0r.rhapsody.adapter.ScaleImageAdapter;
 import com.n0texpecterr0r.rhapsody.adapter.base.BaseAdapter.OnItemClickListener;
+import com.n0texpecterr0r.rhapsody.util.ToastUtil;
 import com.n0texpecterr0r.rhapsody.view.base.BaseActivity;
 import java.util.ArrayList;
 
-public class PreviewActivity extends BaseActivity implements CheckBox.OnClickListener, OnItemClickListener,
-        ViewPager.OnPageChangeListener {
+/**
+ * @author Created by Nullptr
+ * @date 2018/8/1 10:06
+ * @describe 图片详情界面
+ */
+public class ImageDetailActivity extends BaseActivity implements OnItemClickListener,
+        OnPageChangeListener, CheckBox.OnClickListener {
 
-    private ArrayList<String> mPaths;               // 传入的地址List
-    private ArrayList<String> mCheckedPaths;        // 选中的List
-    private int currentIndex;                       // 当前index
+
+    private static ArrayList<String> mPaths;        // 所有图片的Paths
+    private static ArrayList<String> mCheckedPaths; // 被选中的Paths
+    private static int mCurrentIndex;               // 当前Index
     private ViewPager mVpImageArea;                 // 显示图片的ViewPager
     private RecyclerView mRvImageList;              // 显示图片列表的RecyclerView
     private Toolbar mToolbar;                       // ToolBar
@@ -30,9 +40,12 @@ public class PreviewActivity extends BaseActivity implements CheckBox.OnClickLis
     private ImageAdapter mImageAdapter;             // RecyclerView的Adapter
     private ScaleImageAdapter mScaleImageAdapter;   // ViewPager的Adapter
 
-    public static void actionStart(Context context, ArrayList<String> paths) {
-        Intent intent = new Intent(context, PreviewActivity.class);
+    public static void actionStart(Context context, int currentIndex, ArrayList<String> paths,
+            ArrayList<String> checkedPaths) {
+        Intent intent = new Intent(context, ImageDetailActivity.class);
+        intent.putExtra("index", currentIndex);
         intent.putStringArrayListExtra("paths", paths);
+        intent.putStringArrayListExtra("checked_paths", checkedPaths);
         context.startActivity(intent);
     }
 
@@ -41,7 +54,9 @@ public class PreviewActivity extends BaseActivity implements CheckBox.OnClickLis
         // 获取数据
         Intent intent = getIntent();
         mPaths = intent.getStringArrayListExtra("paths");
-        mCheckedPaths = new ArrayList<>(mPaths);
+        mCheckedPaths = intent.getStringArrayListExtra("checked_paths");
+        mCurrentIndex = intent.getIntExtra("index", 0);
+        Log.d("initVariables", mCurrentIndex + "");
     }
 
     @Override
@@ -49,7 +64,7 @@ public class PreviewActivity extends BaseActivity implements CheckBox.OnClickLis
         setContentView(R.layout.activity_preview);
 
         // 初始化底部图片栏
-        mImageAdapter = new ImageAdapter(mPaths, R.layout.item_image);
+        mImageAdapter = new ImageAdapter(mCheckedPaths, R.layout.item_image);
         mRvImageList = findViewById(R.id.preview_rv_bottom);
         mRvImageList.setLayoutManager(new LinearLayoutManager(this,
                 LinearLayoutManager.HORIZONTAL, false));
@@ -74,13 +89,14 @@ public class PreviewActivity extends BaseActivity implements CheckBox.OnClickLis
 
     @Override
     protected void loadData() {
-
+        super.onResume();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        setCurrent(0);
+        setCurrent(mCurrentIndex);
+        mVpImageArea.setCurrentItem(mCurrentIndex);
     }
 
     /**
@@ -89,10 +105,11 @@ public class PreviewActivity extends BaseActivity implements CheckBox.OnClickLis
      * @param index 当前index
      */
     private void setCurrent(int index) {
-        currentIndex = index;
-        mToolbar.setTitle((currentIndex + 1) + "/" + mPaths.size());
+        mCurrentIndex = index;
+        mToolbar.setTitle((mCurrentIndex + 1) + "/" + mPaths.size());
         mCbSelect.setChecked(checkChecked(index));
-        mImageAdapter.setCurrentIndex(currentIndex);
+        int checkedIndex = mCheckedPaths.indexOf(mPaths.get(index));
+        mImageAdapter.setCurrentIndex(checkedIndex);
     }
 
     /**
@@ -107,12 +124,12 @@ public class PreviewActivity extends BaseActivity implements CheckBox.OnClickLis
 
     @Override
     public void onClick(View v) {
-        if (checkChecked(currentIndex)) {
-            mCheckedPaths.remove(mPaths.get(currentIndex));
-            mImageAdapter.addDeleteIndex(currentIndex);
+        if (checkChecked(mCurrentIndex)) {
+            mCheckedPaths.remove(mPaths.get(mCurrentIndex));
+            setCurrent(mCurrentIndex);  // 刷新RecyclerView
         } else {
-            mCheckedPaths.add(mPaths.get(currentIndex));
-            mImageAdapter.removeDeleteIndex(currentIndex);
+            mCheckedPaths.add(mPaths.get(mCurrentIndex));
+            setCurrent(mCurrentIndex);  // 刷新RecyclerView
         }
     }
 
@@ -126,6 +143,7 @@ public class PreviewActivity extends BaseActivity implements CheckBox.OnClickLis
         sendBroadcast(intent);
     }
 
+
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
     }
@@ -137,12 +155,19 @@ public class PreviewActivity extends BaseActivity implements CheckBox.OnClickLis
 
     @Override
     public void onPageScrollStateChanged(int state) {
+
     }
 
-    // 底部RecyclerView的item点击事件
     @Override
     public void onItemClick(View view, int position) {
-        setCurrent(position);
-        mVpImageArea.setCurrentItem(position);
+        int index = 0;
+        if (mPaths.contains(mCheckedPaths.get(position))) {
+            index = mPaths.indexOf(mCheckedPaths.get(position));    // 计算在总的Index中的index
+        }else{
+            ToastUtil.show(this,"点击的图片不在当前文件夹");
+        }
+        setCurrent(index);
+        mVpImageArea.setCurrentItem(index);
     }
+
 }

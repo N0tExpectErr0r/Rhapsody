@@ -13,13 +13,13 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.Toast;
 import com.n0texpecterr0r.rhapsody.Constants;
 import com.n0texpecterr0r.rhapsody.R;
 import com.n0texpecterr0r.rhapsody.SelectConfig;
 import com.n0texpecterr0r.rhapsody.adapter.GalleryAdapter.ImageViewHolder;
 import com.n0texpecterr0r.rhapsody.engine.ImageEngine;
-import com.n0texpecterr0r.rhapsody.view.PreviewActivity;
+import com.n0texpecterr0r.rhapsody.util.ToastUtil;
+import com.n0texpecterr0r.rhapsody.view.ImageDetailActivity;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,8 +110,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<ImageViewHolder> implem
                 } else {
                     // 不能选择
                     checkBox.setChecked(false);
-                    Toast.makeText(mContext, "最多只能选择" + mMaxCheckCount + "张图片",
-                            Toast.LENGTH_SHORT).show();
+                    ToastUtil.show(mContext, "最多只能选择" + mMaxCheckCount + "张图片");
                 }
 
                 // 发送选中数量的广播更新ui
@@ -130,9 +129,10 @@ public class GalleryAdapter extends RecyclerView.Adapter<ImageViewHolder> implem
 
     /**
      * 改变选中路径
+     *
      * @param selectPaths 选中的路径
      */
-    public void changeSelect(List<String> selectPaths){
+    public void changeSelect(List<String> selectPaths) {
         mCheckedImages = selectPaths;
         mCheckCount = selectPaths.size();
         notifyDataSetChanged();
@@ -148,10 +148,13 @@ public class GalleryAdapter extends RecyclerView.Adapter<ImageViewHolder> implem
     public void onClick(View v) {
         // 图片部分的点击事件
         int position = (int) v.getTag();
+        ImageDetailActivity.actionStart(mContext, position,
+                (ArrayList<String>) mPaths, (ArrayList<String>) mCheckedImages);
     }
 
     /**
      * 获取选中的图片的List
+     *
      * @return 选中的图片List
      */
     public ArrayList<String> getCheckedImages() {
