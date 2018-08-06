@@ -153,6 +153,7 @@ public class ImageDetailActivity extends BaseActivity implements OnItemClickList
         mCbSelect.setChecked(checkChecked(index));
         int checkedIndex = mCheckedPaths.indexOf(mPaths.get(index));
         mImageAdapter.setCurrentIndex(checkedIndex);
+        mRvImageList.scrollToPosition(checkedIndex);
     }
 
     /**

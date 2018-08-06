@@ -23,7 +23,6 @@ public class Rhapsody {
      */
     private Rhapsody(Activity activity) {
         this(activity, (Fragment)null);
-
     }
 
     /**
@@ -73,7 +72,7 @@ public class Rhapsody {
      * 获取传入的Activity
      * @return 传入的Activity
      */
-    public Activity getActivity() {
+    Activity getActivity() {
         return mActivity.get();
     }
 
@@ -81,8 +80,7 @@ public class Rhapsody {
      * 获取传入的Fragment
      * @return 传入的Fragment
      */
-    public Fragment getFragment() {
+    Fragment getFragment() {
         return mFragment.get();
     }
-
 }

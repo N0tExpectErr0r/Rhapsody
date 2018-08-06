@@ -130,6 +130,7 @@ public class PreviewActivity extends BaseActivity implements CheckBox.OnClickLis
         mToolbar.setTitle((currentIndex + 1) + "/" + mPaths.size());
         mCbSelect.setChecked(checkChecked(index));
         mImageAdapter.setCurrentIndex(currentIndex);
+        mRvImageList.scrollToPosition(index);
     }
 
     /**

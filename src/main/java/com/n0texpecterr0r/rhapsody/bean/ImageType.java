@@ -15,6 +15,7 @@ public enum ImageType {
     PNG("image/png",arraySetOf("png")),
     GIF("image/gif",arraySetOf("gif"));
 
+
     //类型名
     private final String mTypeName;
     //类型包含的后缀名
