@@ -121,6 +121,9 @@ public class GalleryAdapter extends RecyclerView.Adapter<ImageViewHolder> implem
 
     }
 
+    /**
+     * 发送广播更新UI
+     */
     private void sendBroadcastUpdateUI() {
         Intent intent = new Intent();
         intent.setAction(Constants.FRESH_SELECT);

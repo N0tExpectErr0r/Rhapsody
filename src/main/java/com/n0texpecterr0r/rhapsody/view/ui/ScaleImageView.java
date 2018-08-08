@@ -199,13 +199,7 @@ public class ScaleImageView extends ImageView {
         float width = getWidth();
         float height = getHeight();
         float nextScale = caculateNextScale(innerScale, outerScale);
-        //如果接下来放大大于最大值或者小于fit center值，则取边界
-        if (nextScale > mMidScaleValue) {
-            nextScale = mMidScaleValue;
-        }
-        if (nextScale < innerScale) {
-            nextScale = innerScale;
-        }
+
         // 计算缩放后矩阵
         Matrix scaleMatrix = new Matrix(mOuterMatrix);
         // 缩放
@@ -223,7 +217,7 @@ public class ScaleImageView extends ImageView {
         float postY = 0;
         if (bound.right - bound.left < width) {
             postX = width / 2f - (bound.right + bound.left) / 2f;
-        } else if (bound.left > 0) {
+        } else if (bound.left > +0) {
             postX = -bound.left;
         } else if (bound.right < width) {
             postX = width - bound.right;
@@ -369,7 +363,7 @@ public class ScaleImageView extends ImageView {
         if (outerScale * postScale < 1.0F) {
             postScale = 1.0F / outerScale;
         }
-        // 缩放修正不为1，则进行了修正
+        // 缩放比例不为 1 ，则进行了修正
         if (postScale != 1.0F) {
             isChanged = true;
         }

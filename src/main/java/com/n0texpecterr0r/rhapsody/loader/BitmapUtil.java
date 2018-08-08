@@ -19,25 +19,6 @@ import java.io.ByteArrayOutputStream;
 public class BitmapUtil {
 
     /**
-     * 将uri转换为Bitmap
-     *
-     * @param context 获取ContentResolver的上下文
-     * @param uri 要转换的uri
-     * @return 转换后的Bitmap
-     */
-    public static Bitmap getBitmapFromUri(Context context, Uri uri) {
-        try {
-            // 读取uri所在的图片
-            return MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
-        } catch (Exception e) {
-            Log.e("[Android]", e.getMessage());
-            Log.e("[Android]", "目录为：" + uri);
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
      * 从图片路径获取图片
      *
      * @param imagePath 图片路径
@@ -91,52 +72,4 @@ public class BitmapUtil {
 
         return inSampleSize;
     }
-
-    /**
-     * 图片质量压缩
-     *
-     * @param image 要压缩的图片
-     * @return 压缩后的图片
-     */
-    public static Bitmap compressImage(Bitmap image) {
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        // 质量压缩法，这里100表示不压缩，把压缩后的数据存放到baos中
-        image.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        int options = 100;
-        // 循环判断如果压缩后图片是否大于100kb,大于继续压缩
-        while (baos.toByteArray().length / 1024 > 100) {
-            baos.reset();
-            // 压缩options%，把压缩后的数据存放到baos中
-            image.compress(Bitmap.CompressFormat.JPEG, options, baos);
-            options -= 10;//每次都减少10
-        }
-        ByteArrayInputStream isBm = new ByteArrayInputStream(baos.toByteArray());
-        // 生成Bitmap
-        return BitmapFactory.decodeStream(isBm, null, null);
-    }
-
-    /**
-     * 对图片进行等比例缩放
-     *
-     * @param bitmap 要缩放的图片
-     * @param newWidth 目标宽度
-     * @return 缩放后图片
-     */
-    public static Bitmap scaleBitmap(Bitmap bitmap, int newWidth) {
-
-        // 获得图片的宽高
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-        // 计算缩放比例
-        float newHeight = newWidth * height / width;
-        float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = newHeight / height;
-        // 取得想要缩放的matrix参数
-        Matrix matrix = new Matrix();
-        matrix.postScale(scaleWidth, scaleHeight);
-        // 得到新的图片
-        return Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-    }
-
 }

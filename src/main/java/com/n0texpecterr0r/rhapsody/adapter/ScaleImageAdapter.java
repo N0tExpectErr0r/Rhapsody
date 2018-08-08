@@ -5,7 +5,6 @@ import android.support.v4.view.PagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 import com.n0texpecterr0r.rhapsody.SelectConfig;
-import com.n0texpecterr0r.rhapsody.view.ui.PinchImageView;
 import com.n0texpecterr0r.rhapsody.view.ui.ScaleImageView;
 import java.util.List;
 
